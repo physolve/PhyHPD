@@ -65,6 +65,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::onConnectButtonClicked()
 {
+    //test test
+    
     if (!modbusDevice)
         return;
 
