@@ -5,6 +5,7 @@
 #include <QModbusDataUnit>
 #include <QElapsedTimer>
 #include "settingsdialog.h"
+#include "writelogfile.h"
 
 class QModbusClient;
 class QModbusReply;
@@ -94,5 +95,7 @@ private:
     QTimer* m_timer;
     QElapsedTimer m_timePassed;
     Data m_points;
+
+    WriteLogFile m_writeLog;
 };
 

@@ -51,9 +51,9 @@ void CustomPlotItem::initCustomPlot(int index) {
     connect(m_CustomPlot->yAxis, SIGNAL(rangeChanged(QCPRange)), m_CustomPlot->yAxis2, SLOT(setRange(QCPRange))); //?
 
 
-    m_CustomPlot->xAxis->setLabel("t");
+    m_CustomPlot->xAxis->setLabel("Время, с");
     m_CustomPlot->xAxis->setLabelColor(Qt::white);
-    m_CustomPlot->yAxis->setLabel("P, bar");
+    m_CustomPlot->yAxis->setLabel("Поток, норм. л./мин");
     m_CustomPlot->yAxis->setLabelColor(Qt::white);
     m_CustomPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     //startTimer(500);
@@ -150,7 +150,9 @@ void CustomPlotItem::backendData(QList<double> x, QList<double> y){
   lastPointKey = x.last();
   m_CustomPlot->xAxis->setRange(lastPointKey, 10, Qt::AlignRight); // means there a 10 sec
   m_CustomPlot->yAxis->rescale();
-  m_CustomPlot->yAxis->scaleRange(1.05, m_CustomPlot->yAxis->range().center());
+  //m_CustomPlot->yAxis->scaleRange(1.05, m_CustomPlot->yAxis->range().center());
+  //m_CustomPlot->graph(0)->rescaleValueAxis(false);
+  //m_CustomPlot->yAxis->scaleRange(1.1, m_CustomPlot->yAxis->range().center());
   m_CustomPlot->replot();
 }
 

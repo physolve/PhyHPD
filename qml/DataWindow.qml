@@ -51,7 +51,7 @@ Item{
             }
             TextField {
                 id: readAddress
-                text: "0"
+                text: "1"
                 font.pointSize: 12
                 color: "white"
                 selectByMouse: true

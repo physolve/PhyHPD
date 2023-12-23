@@ -6,7 +6,7 @@
 struct Settings {
     Q_GADGET
 public:
-    int m_parity = QSerialPort::EvenParity;
+    int m_parity = QSerialPort::EvenParity;// QSerialPort::EvenParity;
     int m_baud = QSerialPort::Baud19200;
     int m_dataBits = QSerialPort::Data8;
     int m_stopBits = QSerialPort::OneStop;

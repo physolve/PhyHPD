@@ -11,7 +11,7 @@
 
 
 MainWindow::MainWindow(int &argc, char **argv)
-    : QApplication(argc, argv), m_portEdit("COM"), m_serverEdit(1), m_startAddress(0), m_readSize(10),
+    : QApplication(argc, argv), m_portEdit("COM"), m_serverEdit(1), m_startAddress(1), m_readSize(10),
     m_timer(new QTimer), m_points("Flow",{0},{0})
 {
     QQuickStyle::setStyle("Material");
@@ -90,7 +90,7 @@ void MainWindow::onConnectButtonClicked()
         //ui->actionConnect->setEnabled(true); // ui
         //ui->actionDisconnect->setEnabled(false); // ui
     }
-    setLogText("Connected to " + m_portEdit);
+    setLogText("Connected to " + m_portEdit + "\nTemperature address: 41272 (x2)\nFlow address: 41216 (x2)");
 }
 
 void MainWindow::onModbusStateChanged(int state)
@@ -139,7 +139,7 @@ void MainWindow::onReadReady()
     auto reply = qobject_cast<QModbusReply *>(sender());
     if (!reply)
         return;
-
+    m_points.x.append(m_timePassed.elapsed()/1000);
     if (reply->error() == QModbusDevice::NoError) {
         const QModbusDataUnit unit = reply->result();
         for (qsizetype i = 0, total = unit.valueCount(); i < total; ++i) {
@@ -147,20 +147,51 @@ void MainWindow::onReadReady()
                                      .arg(QString::number(unit.value(i))); //, 16
             m_readValue << entry;
         }
-        m_points.x.append(m_timePassed.elapsed()/1000);
-        m_points.y.append(unit.value(0));
+        if(unit.valueCount() == 2){
+            //QVector<quint16> mm;
+            //mm.append(unit.value(0));
+            //mm.append(unit.value(1));
+
+            float x;
+            unsigned long *p;
+
+            p = (unsigned long*)&x;
+
+            *p = (unsigned long)unit.value(0)<<16 | unit.value(1);
+            qDebug() << x;
+            float fiteredVal = 0;
+            if(unit.startAddress() == 41216)
+                fiteredVal = x*55;
+            else if(unit.startAddress() == 41272)
+                fiteredVal = x*1;
+            else fiteredVal = x;
+            m_points.y.append(fiteredVal);
+        }
+        else{
+            m_points.y.append(unit.value(0));
+        }
+        
+        if(unit.startAddress() == 41272){
+            setLogText("Читаю температуру: " + QString::number(m_points.y.last()) + " °C");   
+        }
+        if(unit.startAddress() == 41216){
+            setLogText("Текущий поток: " + QString::number(m_points.y.last()) + " норм. л./мин");   
+        }
+        
     } else if (reply->error() == QModbusDevice::ProtocolError) {
         setLogText(tr("Read response error: %1 (Modbus exception: 0x%2)").
                                     arg(reply->errorString()).
                                     arg(reply->rawResult().exceptionCode(), -1, 16)); // log
+        m_points.y.append(0);
     } else {
         setLogText(tr("Read response error: %1 (code: 0x%2)").
                                     arg(reply->errorString()).
                                     arg(reply->error(), -1, 16)); // log
+        m_points.y.append(0);
     }
-    
+    m_writeLog.writeLine(QString("%1\t%2").arg(m_points.x.last()).arg(m_points.y.last()));
     setData(m_readValue);
-    emit pointsChanged(m_points.x,m_points.y);
+    emit pointsChanged(m_points.x,m_points.y); 
     reply->deleteLater();
 }
 
