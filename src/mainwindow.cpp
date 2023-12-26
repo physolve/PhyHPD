@@ -1,18 +1,13 @@
 
 #include "mainwindow.h"
 #include "CustomPlotItem.h"
-//#include "writeregistermodel.h"
+
 #include <QQmlContext>
 #include <QtQuickControls2/QQuickStyle>
-#include <QModbusRtuSerialClient>
-#include <QStandardItemModel>
-#include <QStatusBar>
-#include <QUrl>
-
 
 MainWindow::MainWindow(int &argc, char **argv)
-    : QApplication(argc, argv), m_portEdit("COM"), m_serverEdit(1), m_startAddress(1), m_readSize(10),
-    m_timer(new QTimer), m_points("Flow",{0},{0})
+    : QApplication(argc, argv), m_timer(new QTimer), m_points("Flow",{0},{0}), m_settings(new SettingsDialog),
+    m_serial(new QSerialPort(this))
 {
     QQuickStyle::setStyle("Material");
     QString applicationName = "MHgrph";
@@ -28,29 +23,14 @@ MainWindow::MainWindow(int &argc, char **argv)
     Qt::QueuedConnection);
     qmlRegisterType<CustomPlotItem>("CustomPlot", 1, 0, "CustomPlotItem");
     m_engine.rootContext()->setContextProperty("backend", this);
+    m_engine.rootContext()->setContextProperty("settingsDialog", m_settings);
     m_engine.load(url);
 
     setLogText("Click connect");
-    // only SERIAL
-    if (modbusDevice) {
-        modbusDevice->disconnectDevice();
-        delete modbusDevice;
-        modbusDevice = nullptr;
-    }
 
-    modbusDevice = new QModbusRtuSerialClient(this);
+    connect(m_serial, &QSerialPort::errorOccurred, this, &MainWindow::handleError);
 
-    connect(modbusDevice, &QModbusClient::errorOccurred, [this](QModbusDevice::Error) {
-        setLogText(modbusDevice->errorString()); // log under
-    });
-
-    if (!modbusDevice) {
-        //ui->connectButton->setDisabled(true); //?
-        setLogText("Could not create Modbus client."); // log under
-    } else {
-        connect(modbusDevice, &QModbusClient::stateChanged,
-                this, &MainWindow::onModbusStateChanged);
-    }
+    connect(m_serial, &QSerialPort::readyRead, this, &MainWindow::readData);
 
     connect(m_timer, &QTimer::timeout, this, &MainWindow::processEvents);
 }
@@ -58,53 +38,68 @@ MainWindow::MainWindow(int &argc, char **argv)
 MainWindow::~MainWindow()
 {
     m_timer->stop();
-    if (modbusDevice)
-        modbusDevice->disconnectDevice();
-    delete modbusDevice;
+    delete m_settings;
 }
 
-void MainWindow::onConnectButtonClicked()
+void MainWindow::openSerialPort()
 {
-    //test test
-    
-    if (!modbusDevice)
-        return;
-
-    setLogText(""); // log
-    if (modbusDevice->state() != QModbusDevice::ConnectedState) {
-       
-        modbusDevice->setConnectionParameter(QModbusDevice::SerialPortNameParameter, this->m_portEdit);
-        modbusDevice->setConnectionParameter(QModbusDevice::SerialParityParameter, setObj.m_parity); // from settings
-        modbusDevice->setConnectionParameter(QModbusDevice::SerialBaudRateParameter, setObj.m_baud); // from settings
-        modbusDevice->setConnectionParameter(QModbusDevice::SerialDataBitsParameter, setObj.m_dataBits); // from settings
-        modbusDevice->setConnectionParameter(QModbusDevice::SerialStopBitsParameter, setObj.m_stopBits); // from settings
-
-        modbusDevice->setTimeout(setObj.m_responseTime);
-        modbusDevice->setNumberOfRetries(setObj.m_numberOfRetries);
-        if (!modbusDevice->connectDevice()) {
-            setLogText(tr("Connect failed: ") + modbusDevice->errorString()); // log
-        } else {
-            //ui->actionConnect->setEnabled(false); // ui
-            //ui->actionDisconnect->setEnabled(true); // ui
-        }
+    const SettingsDialog::Settings p = m_settings->settings();
+    m_serial->setPortName(p.name);
+    m_serial->setBaudRate(p.baudRate);
+    m_serial->setDataBits(p.dataBits);
+    m_serial->setParity(p.parity);
+    m_serial->setStopBits(p.stopBits);
+    //m_serial->setFlowControl(p.flowControl);
+    if (m_serial->open(QIODevice::ReadWrite)) {
+        //m_console->setEnabled(true);
+        //m_console->setLocalEchoEnabled(p.localEchoEnabled);
+        //m_ui->actionConnect->setEnabled(false);
+        //m_ui->actionDisconnect->setEnabled(true);
+        //m_ui->actionConfigure->setEnabled(false);
+        setLogText(tr("Connected to %1 : %2, %3, %4, %5")
+                          .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
+                          .arg(p.stringParity).arg(p.stringStopBits));
     } else {
-        modbusDevice->disconnectDevice();
-        //ui->actionConnect->setEnabled(true); // ui
-        //ui->actionDisconnect->setEnabled(false); // ui
+        //QMessageBox::critical(this, tr("Error"), m_serial->errorString());
+
+        setLogText(tr("Open error"));
     }
-    setLogText("Connected to " + m_portEdit + "\nTemperature address: 41272 (x2)\nFlow address: 41216 (x2)");
 }
 
-void MainWindow::onModbusStateChanged(int state)
+void MainWindow::closeSerialPort()
 {
-    bool connected = (state != QModbusDevice::UnconnectedState);
-    //ui->actionConnect->setEnabled(!connected); // ui
-    //ui->actionDisconnect->setEnabled(connected); // ui
+    if (m_serial->isOpen())
+        m_serial->close();
+    //m_console->setEnabled(false);
+    //m_ui->actionConnect->setEnabled(true);
+    //m_ui->actionDisconnect->setEnabled(false);
+    //m_ui->actionConfigure->setEnabled(true);
+    setLogText(tr("Disconnected"));
+}
 
-    //if (state == QModbusDevice::UnconnectedState)
-        //ui->connectButton->setText(tr("Connect")); // ui
-    //else if (state == QModbusDevice::ConnectedState)
-        //ui->connectButton->setText(tr("Disconnect")); // ui
+void MainWindow::writeData(const QByteArray &data)
+{
+    m_serial->write(data);
+}
+
+void MainWindow::readData()
+{
+    const QByteArray data = m_serial->readAll();
+    //m_console->putData(data);
+    
+    m_points.x.append(m_timePassed.elapsed()/1000);
+
+    m_points.y.append(data.toDouble());
+
+    emit pointsChanged(m_points.x,m_points.y);
+}
+
+void MainWindow::handleError(QSerialPort::SerialPortError error)
+{
+    if (error == QSerialPort::ResourceError) {
+        //QMessageBox::critical(this, tr("Critical Error"), m_serial->errorString());
+        closeSerialPort();
+    }
 }
 
 void MainWindow::onReadButtonClicked(bool s)
@@ -121,92 +116,25 @@ void MainWindow::onReadButtonClicked(bool s)
 }
 
 void MainWindow::processEvents(){
-    if (!modbusDevice)
-        return;
-    m_readValue.clear();
+    
+    // if (!modbusDevice)
+    //     return;
+    
+    // m_readValue.clear();
+    const QString query = "#011";
+
     setLogText(""); // log
 
-    if (auto *reply = modbusDevice->sendReadRequest(readRequest(), this->m_serverEdit)) { // ui server address
-        if (!reply->isFinished())
-            connect(reply, &QModbusReply::finished, this, &MainWindow::onReadReady);
-        else
-            delete reply; // broadcast replies return immediately
-    } else {
-        setLogText(tr("Read error: ") + modbusDevice->errorString()); // log
-    }
-}
+    writeData(query.toLocal8Bit());
+    // if (auto *reply = modbusDevice->sendReadRequest(readRequest(), this->m_serverEdit)) { // ui server address
+    //     if (!reply->isFinished())
+    //         connect(reply, &QModbusReply::finished, this, &MainWindow::onReadReady);
+    //     else
+    //         delete reply; // broadcast replies return immediately
+    // } else {
+    //     setLogText(tr("Read error: ") + modbusDevice->errorString()); // log
+    // }
 
-void MainWindow::onReadReady()
-{
-    auto reply = qobject_cast<QModbusReply *>(sender());
-    if (!reply)
-        return;
-    m_points.x.append(m_timePassed.elapsed()/1000);
-    if (reply->error() == QModbusDevice::NoError) {
-        const QModbusDataUnit unit = reply->result();
-        for (qsizetype i = 0, total = unit.valueCount(); i < total; ++i) {
-            const QString entry = tr("Address: %1, Value: %2").arg(unit.startAddress() + i)
-                                     .arg(QString::number(unit.value(i))); //, 16
-            m_readValue << entry;
-        }
-        if(unit.valueCount() == 2){
-            //QVector<quint16> mm;
-            //mm.append(unit.value(0));
-            //mm.append(unit.value(1));
-
-            float x;
-            unsigned long *p;
-
-            p = (unsigned long*)&x;
-
-            *p = (unsigned long)unit.value(0)<<16 | unit.value(1);
-            qDebug() << x;
-            float fiteredVal = 0;
-            if(unit.startAddress() == 41216)
-                fiteredVal = x*55;
-            else if(unit.startAddress() == 41272)
-                fiteredVal = x*1;
-            else fiteredVal = x;
-            m_points.y.append(fiteredVal);
-        }
-        else{
-            m_points.y.append(unit.value(0));
-        }
-        
-        if(unit.startAddress() == 41272){
-            setLogText("Читаю температуру: " + QString::number(m_points.y.last()) + " °C");   
-        }
-        if(unit.startAddress() == 41216){
-            setLogText("Текущий поток: " + QString::number(m_points.y.last()) + " норм. л./мин");   
-        }
-        
-    } else if (reply->error() == QModbusDevice::ProtocolError) {
-        setLogText(tr("Read response error: %1 (Modbus exception: 0x%2)").
-                                    arg(reply->errorString()).
-                                    arg(reply->rawResult().exceptionCode(), -1, 16)); // log
-        m_points.y.append(0);
-    } else {
-        setLogText(tr("Read response error: %1 (code: 0x%2)").
-                                    arg(reply->errorString()).
-                                    arg(reply->error(), -1, 16)); // log
-        m_points.y.append(0);
-    }
-    m_writeLog.writeLine(QString("%1\t%2").arg(m_points.x.last()).arg(m_points.y.last()));
-    setData(m_readValue);
-    emit pointsChanged(m_points.x,m_points.y); 
-    reply->deleteLater();
-}
-
-QModbusDataUnit MainWindow::readRequest() const
-{
-    const auto table = QModbusDataUnit::HoldingRegisters;
-
-    int startAddress = m_startAddress;
-    //Q_ASSERT(startAddress >= 0 && startAddress < 10); // check address 10
-
-    // do not go beyond 10 entries
-    quint16 numberOfEntries = quint16(m_readSize); // check address
-    return QModbusDataUnit(table, startAddress, numberOfEntries);
 }
 
 QString MainWindow::getLogText() const
@@ -214,7 +142,7 @@ QString MainWindow::getLogText() const
     return logText;
 }
  
-void MainWindow::setLogText(QString text)
+void MainWindow::setLogText(const QString &text)
 {
     if (text != logText)
     {
@@ -222,17 +150,3 @@ void MainWindow::setLogText(QString text)
         emit logChanged(text);
     }
 }
-
-QStringList MainWindow::data() const
-{
-  return m_data;
-}
-
-void MainWindow::setData(const QStringList& data)
-{
-  if (m_data == data)
-    return;
-  m_data = data;
-  emit dataChanged(m_data);
-}
-

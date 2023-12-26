@@ -7,69 +7,12 @@ Item{
     ColumnLayout{
         anchors.centerIn: parent
         spacing: 10
-        RowLayout{
-            Layout.fillWidth: true
-            Label{
-                text: qsTr("Port:")
-                font.pointSize: 14
-            }
-            TextField {
-                id: portEdit
-                text: "COM"
-                font.pointSize: 12
-                color: "white"
-                selectByMouse: true
-                cursorVisible: true
-                onEditingFinished: backend.portEdit = portEdit.text
-            }
-            Label{
-                text: qsTr("Server Address:")
-                font.pointSize: 14
-            }
-            SpinBox {
-                id: serverEdit
-                editable: true
-                value: 1
-                stepSize: 1
-                from: 1
-                to: 247
-                onValueModified: backend.serverEdit = serverEdit.value
-            }
-            Button {
-                id: connectBtn
-                text: qsTr("Connect")
-                font.pointSize: 14
-                onClicked: backend.onConnectButtonClicked()
-            }
-        }
-        GridLayout{
-            columns: 2
-            Layout.fillWidth: true
-            Label{
-                text: qsTr("Start address:")
-                font.pointSize: 14
-            }
-            TextField {
-                id: readAddress
-                text: "1"
-                font.pointSize: 12
-                color: "white"
-                selectByMouse: true
-                cursorVisible: true
-                onEditingFinished: backend.startAddress = parseInt(readAddress.text)
-            }
-            Label{
-                text: qsTr("Number of values:")
-                font.pointSize: 14
-            }
-            TextField {
-                id: readSize
-                text: "10"
-                font.pointSize: 12
-                color: "white"
-                selectByMouse: true
-                cursorVisible: true
-                onEditingFinished: backend.readSize = parseInt(readSize.text)
+        Button{
+            id: connectBtn
+            text: (connectBtn.checked ? qsTr("Disconnect") : qsTr("Connect"))
+            checkable: true
+            onToggled: {
+                (connectBtn.checked ? backend.openSerialPort : backend.closeSerialPort)
             }
         }
         ListView {
@@ -88,12 +31,15 @@ Item{
                 }
             }
         }
-        // Button{
-        //     id: readBtn
-        //     text: qsTr("Read")
-        //     font.pointSize: 14
-        //     onClicked: backend.onReadButtonClicked()
-        // }
+        
+        Button{
+            id: configureBtn
+            text: qsTr("Configure")
+            onClicked: {
+                setiingsDialog.open()
+            }
+        }
+
         Switch {
             id: startBtn
             text: qsTr("Start Read")
@@ -110,10 +56,15 @@ Item{
                 radius: 20
                 color: "yellow"
             }
-        }
-        
-        
+        }        
     }
-    
-
+    Item{    
+        SettingsDialog{
+            id: setiingsDialog
+            parent: Overlay.overlay
+            padding: 0
+            x: 100
+            y: 200
+        }
+    }
 }

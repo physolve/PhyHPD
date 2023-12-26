@@ -2,6 +2,6 @@
     <qresource prefix="/MHgrph">
         <file>qml/main.qml</file>
         <file>qml/DataWindow.qml</file>
-        <file>qml/settings.qml</file>
+        <file>qml/SettingsDialog.qml</file>
     </qresource>
 </RCC>
