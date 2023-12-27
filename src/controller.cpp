@@ -1,12 +1,28 @@
+#include "controller.h"
 
-void MainWindow::openSerialPort()
+Controller::Controller(const SettingsDialog::Settings &settings, QObject *parent) : 
+    QObject(parent), m_settings(settings), m_timer(new QTimer), m_points("Flow",{0},{0}),
+    m_serial(new QSerialPort(this))
 {
-    const SettingsDialog::Settings p = m_settings->settings();
-    m_serial->setPortName(p.name);
-    m_serial->setBaudRate(p.baudRate);
-    m_serial->setDataBits(p.dataBits);
-    m_serial->setParity(p.parity);
-    m_serial->setStopBits(p.stopBits);
+    connect(m_serial, &QSerialPort::errorOccurred, this, &Controller::handleError);
+
+    connect(m_serial, &QSerialPort::readyRead, this, &Controller::readData);
+
+    connect(m_timer, &QTimer::timeout, this, &Controller::processEvents);
+
+    setLogText("Click connect");
+}
+Controller::~Controller(){
+    m_timer->stop();
+}
+void Controller::openSerialPort()
+{
+    //const SettingsDialog::Settings p = m_settings->settings();
+    m_serial->setPortName(m_settings.name);
+    m_serial->setBaudRate(m_settings.baudRate);
+    m_serial->setDataBits(m_settings.dataBits);
+    m_serial->setParity(m_settings.parity);
+    m_serial->setStopBits(m_settings.stopBits);
     m_serial->setFlowControl(QSerialPort::NoFlowControl);
     if (m_serial->open(QIODevice::ReadWrite)) {
         //m_console->setEnabled(true);
@@ -15,8 +31,8 @@ void MainWindow::openSerialPort()
         //m_ui->actionDisconnect->setEnabled(true);
         //m_ui->actionConfigure->setEnabled(false);
         setLogText(tr("Connected to %1 : %2, %3, %4, %5")
-                          .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
-                          .arg(p.stringParity).arg(p.stringStopBits));
+                          .arg(m_settings.name).arg(m_settings.stringBaudRate).arg(m_settings.stringDataBits)
+                          .arg(m_settings.stringParity).arg(m_settings.stringStopBits));
     } else {
         //QMessageBox::critical(this, tr("Error"), m_serial->errorString());
 
@@ -24,7 +40,7 @@ void MainWindow::openSerialPort()
     }
 }
 
-void MainWindow::closeSerialPort()
+void Controller::closeSerialPort()
 {
     if (m_serial->isOpen())
         m_serial->close();
@@ -35,40 +51,25 @@ void MainWindow::closeSerialPort()
     setLogText(tr("Disconnected"));
 }
 
-void MainWindow::writeData(const QByteArray &data)
+void Controller::writeData()
 {
-    m_serial->write(data);
+    const QString query = "#011\r"; 
+    m_serial->write(query.toLocal8Bit());
 }
 
-void MainWindow::readData()
+void Controller::readData()
 {
     const QByteArray data = m_serial->readAll();
-    qDebug() << QString::fromLocal8Bit(data);
-    //data format "+00.000\r"
-    // QString responce = QString::fromLocal8Bit(data);
-    // responce.remove(0,1);
-    // responce.chop(1);
-    // bool ok = true;
-    // auto result = responce.toDouble(&ok);
-    // if(result != 0 && ok)
-    //     m_points.y.append(result);
-    // else{
-    //     m_points.y.append(0);
-    //     if(++threshold>3){
-    //         shuttingOff();
-    //     }
-    // }
-    // m_points.x.append(m_timePassed.elapsed()/1000);
-    // emit pointsChanged(m_points.x, m_points.y);
+    qDebug() << "BASE CLASS" << QString::fromLocal8Bit(data);
 }
 
-void MainWindow::shuttingOff(){
+void Controller::shuttingOff(){
     qDebug() << "Wrong data in sensor!";
-    onReadButtonClicked(false);
+    stopReading();
     //emit to qml status about error   
 }
 
-void MainWindow::handleError(QSerialPort::SerialPortError error)
+void Controller::handleError(QSerialPort::SerialPortError error)
 {
     if (error == QSerialPort::ResourceError) {
         //QMessageBox::critical(this, tr("Critical Error"), m_serial->errorString());
@@ -76,38 +77,88 @@ void MainWindow::handleError(QSerialPort::SerialPortError error)
     }
 }
 
-void MainWindow::onReadButtonClicked(bool s)
+void Controller::startReading()
 {
-    if(s){
-        threshold = 0;
-        m_timer->start(1000);
-        m_timePassed.start();
-    }
-    else{
-        m_timer->stop();
-        m_timePassed.restart();
-        m_points.clearPoints();
+    threshold = 0;
+    m_timer->start(1000);
+    m_timePassed.start();
+}
+void Controller::stopReading(){
+    m_timer->stop();
+    m_timePassed.restart();
+    m_points.clearPoints();
+}
+
+void Controller::processEvents(){
+    setLogText("");
+
+    writeData();
+}
+
+void Controller::setLogText(const QString &text)
+{
+    if (text != logText)
+    {
+        logText = text;
+        emit logChanged(text);
     }
 }
 
-void MainWindow::processEvents(){
-    
-    // if (!modbusDevice)
-    //     return;
-    
-    // m_readValue.clear();
-    const QString query = "001M^\r";//"#011\r";
+PressureController::PressureController(const SettingsDialog::Settings &settings, QObject *parent) : 
+    Controller(settings,parent), query("#011\r")
+{
+}
 
-    setLogText(""); // log
+void PressureController::writeData(){
+    m_serial->write(query.toLocal8Bit());
+}
 
-    writeData(query.toLocal8Bit());
-    // if (auto *reply = modbusDevice->sendReadRequest(readRequest(), this->m_serverEdit)) { // ui server address
-    //     if (!reply->isFinished())
-    //         connect(reply, &QModbusReply::finished, this, &MainWindow::onReadReady);
-    //     else
-    //         delete reply; // broadcast replies return immediately
-    // } else {
-    //     setLogText(tr("Read error: ") + modbusDevice->errorString()); // log
-    // }
+void PressureController::readData(){
+    const QByteArray data = m_serial->readAll();
+    //data format "+00.000\r"
+    QString responce = QString::fromLocal8Bit(data);
+    responce.remove(0,1);
+    responce.chop(1);
+    bool ok = true;
+    auto result = responce.toDouble(&ok);
+    if(result != 0 && ok)
+        m_points.y.append(result);
+    else{
+        m_points.y.append(0);
+        if(++threshold>3){
+            shuttingOff();
+        }
+    }
+    m_points.x.append(m_timePassed.elapsed()/1000);
+    emit pointsChanged(m_points.x, m_points.y);
+}
 
+VacuumController::VacuumController(const SettingsDialog::Settings &settings, QObject *parent) : 
+    Controller(settings,parent), query("001M^\r")
+{
+}
+
+void VacuumController::writeData(){
+    m_serial->write(query.toLocal8Bit());
+}
+
+void VacuumController::readData(){
+    const QByteArray data = m_serial->readAll();
+    //data format 001M100023D -> 1.000Ex (x = 23-20 = 3)
+    QString responce = QString::fromLocal8Bit(data);
+    responce.remove(0,4);
+    responce.chop(1);
+    bool ok = true;
+    double result = responce.first(4).toDouble(&ok)/1000.0;
+    int mantissa = responce.last(2).toInt();
+    if(result != 0 && ok)
+        m_points.y.append(result*pow(10,mantissa));
+    else{
+        m_points.y.append(0);
+        if(++threshold>3){
+            shuttingOff();
+        }
+    }
+    m_points.x.append(m_timePassed.elapsed()/1000);
+    emit pointsChanged(m_points.x, m_points.y);
 }

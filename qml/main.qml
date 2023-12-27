@@ -24,42 +24,49 @@ ApplicationWindow {
             DataWindow{
             }
         }
-        Item {
-            width: 600
-            height: 400
-            CustomPlotItem {
-                id: customPlot
-                width: parent.width;  height: parent.height // resize
-                Component.onCompleted: initCustomPlot(0)
-                Component.onDestruction: testJSString(0)
-                function testJSString(num) {
-                    var text = "I have been destroyed_ %1"
-                    console.log(text.arg(num))
+        ColumnLayout{
+            Item {
+                width: 600
+                height: 400
+                CustomPlotItem {
+                    id: customPlotPressure
+                    width: parent.width;  height: parent.height // resize
+                    Component.onCompleted: initCustomPlot(0)
+                    Component.onDestruction: testJSString(0)
+                    function testJSString(num) {
+                        var text = "I have been destroyed_ %1"
+                        console.log(text.arg(num))
+                    }
+                }
+                Connections {
+                    target: pressureBack 
+                    onPointsChanged: {
+                        customPlotPressure.backendData(x, y)
+                    }
                 }
             }
-            // Connections {
-            //     target: dataView.model    // EDIT: I drew the wrong conclusions here, see text below!
-            //     function onDataChanged() {
-            //         customPlot.backendData(model.x, model.y)
-            //         //gRAMsMnemoForm.setVal(model.cv, model.index) // it's Working
-            //     }
-            // }
-            Connections {
-                target: backend 
-                onPointsChanged: {
-                    customPlot.backendData(x, y)
+            Item {
+                width: 600
+                height: 400
+                CustomPlotItem {
+                    id: customPlotVacuum
+                    width: parent.width;  height: parent.height // resize
+                    Component.onCompleted: initCustomPlot(0)
+                    Component.onDestruction: testJSString(0)
+                    function testJSString(num) {
+                        var text = "I have been destroyed_ %1"
+                        console.log(text.arg(num))
+                    }
+                }
+                Connections {
+                    target: vacuumBack 
+                    onPointsChanged: {
+                        customPlotVacuum.backendData(x, y)
+                    }
                 }
             }
         }
-        // Loader {
-        //     id: myLoader
-        //     source: "qrc:/MHgrph/dataWindow.qml"
-        // }
-
-        // Connections {
-        //     target: myLoader.item
-        //     function onMessage(msg) { console.log(msg) }
-        // }
+        
     }
 
 }

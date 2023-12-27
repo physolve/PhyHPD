@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QSerialPort>
+#include <QElapsedTimer>
 #include <QVariant>
 
 class SettingsDialog : public QObject
@@ -10,6 +11,7 @@ class SettingsDialog : public QObject
 public:
     struct Settings {
         QString name;
+        QString description;
         qint32 baudRate;
         QString stringBaudRate;
         QSerialPort::DataBits dataBits;
@@ -26,11 +28,11 @@ public:
     explicit SettingsDialog(QObject *parent = nullptr);
     ~SettingsDialog();
 
-    Settings settings() const;
+    Settings settings(const QString &c_name) const;
 
     QVariantMap serialPortListRead() const;
 
-    Q_INVOKABLE void apply(const QVariantMap& map);
+    Q_INVOKABLE void apply(const QVariantMap &map, const QString &c_name);
 
 private slots:
 
@@ -38,8 +40,7 @@ private:
     void fillPortsInfo();
     void updateSettings();
 
-private:
-    Settings m_currentSettings;
+    QMap<QString,Settings> m_SettingsMap;
 
     QVariantMap m_serialPortList; 
 };

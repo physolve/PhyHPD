@@ -17,17 +17,18 @@ Window {
     //palette.windowText: "brown"
     width: 500
     height: 300
-    function showPortInfo(index){
-        let serialPortInfo = settingsDialog.serialPortList
-        console.log(Object.entries(serialPortInfo))
-        console.log(index)
-        descriptionLabel.text = "Description: " + serialPortInfo[index][1]
-        manufacturerLabel.text = "Manufacturer: " + serialPortInfo[index][2]
-        serialNumberLabel.text = "Serial number: " + serialPortInfo[index][3]
-        locationLabel.text = "Location: " + serialPortInfo[index][4]
-        vidLabel.text = "Vendor Identifier: " + serialPortInfo[index][5]
-        pidLabel.text = "Product Identifier: " + serialPortInfo[index][6]
+    required property string c_name
+
+    Component.onCompleted:{
+        let serialPortInfo = settingsDialog.serialPortList[c_name]
+        descriptionLabel.text = "Description: " + serialPortInfo[1]
+        manufacturerLabel.text = "Manufacturer: " + serialPortInfo[2]
+        serialNumberLabel.text = "Serial number: " + serialPortInfo[3]
+        locationLabel.text = "Location: " + serialPortInfo[4]
+        vidLabel.text = "Vendor Identifier: " + serialPortInfo[5]
+        pidLabel.text = "Product Identifier: " + serialPortInfo[6]
     }
+    // CHECK if current Values from settings is set up
     RowLayout{
         anchors.left: parent.left
         anchors.right: parent.right
@@ -35,17 +36,21 @@ Window {
         spacing: 15
         ColumnLayout{
             Layout.fillWidth: true
-            ComboBox{
-                id: serialPorntInfoCmb
-                Layout.fillWidth: true
-                model: Object.keys(settingsDialog.serialPortList)
-                Component.onCompleted: {
-                    currentIndex = count - 1
-                    showPortInfo(currentText)
-                }
-                onActivated: {
-                    showPortInfo(currentText)
-                }
+            // ComboBox{
+            //     id: serialPorntInfoCmb
+            //     Layout.fillWidth: true
+            //     model: Object.keys(settingsDialog.serialPortList)
+            //     Component.onCompleted: {
+            //         currentIndex = count - 1
+            //         showPortInfo(currentText)
+            //     }
+            //     onActivated: {
+            //         showPortInfo(currentText)
+            //     }
+            // }
+            Label{
+                id: nameLabel
+                text: c_name
             }
             Label{
                 id: descriptionLabel
@@ -134,8 +139,20 @@ Window {
             result["dataBitsBox"] = dataBitsCombo.currentText
             result["parityBox"] = parityCombo.currentIndex
             result["stopBitsBox"] = stopBitsCombo.currentText
-            settingsDialog.apply(result)
+            settingsDialog.apply(result, c_name)
             dialog.close()
         }
     }
 }
+
+    // function showPortInfo(){ //index
+    //     let serialPortInfo = settingsDialog.serialPortList[c_name]
+    //     //console.log(Object.entries(serialPortInfo))
+    //     //console.log(index)
+    //     descriptionLabel.text = "Description: " + serialPortInfo[1]
+    //     manufacturerLabel.text = "Manufacturer: " + serialPortInfo[2]
+    //     serialNumberLabel.text = "Serial number: " + serialPortInfo[3]
+    //     locationLabel.text = "Location: " + serialPortInfo[4]
+    //     vidLabel.text = "Vendor Identifier: " + serialPortInfo[5]
+    //     pidLabel.text = "Product Identifier: " + serialPortInfo[6]
+    // }

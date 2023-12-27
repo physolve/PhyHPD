@@ -31,15 +31,22 @@ Item{
                 }
             }
         }
-        
-        Button{
-            id: configureBtn
-            text: qsTr("Configure")
-            onClicked: {
-                setiingsDialog.show()
+        RowLayout{
+            Button{
+                id: configurePressureBtn
+                text: qsTr("Configure pressure")
+                onClicked: {
+                    pressureDialog.show()
+                }
+            }
+            Button{
+                id: configureVacuumBtn
+                text: qsTr("Configure vacuum")
+                onClicked: {
+                    vacuumDialog.show()
+                }
             }
         }
-
         Switch {
             id: startBtn
             text: qsTr("Start Read")
@@ -60,7 +67,18 @@ Item{
     }
     Item{    
         SettingsDialog{
-            id: setiingsDialog
+            id: pressureDialog
+            c_name: "pressure"
+            //padding: 0
+            //anchors. centerIn: parent
+            //x: 100
+            //y: 500
+        }
+    }
+    Item{    
+        SettingsDialog{
+            id: vacuumDialog
+            c_name: "vacuum"
             //padding: 0
             //anchors. centerIn: parent
             //x: 100

@@ -9,22 +9,24 @@ SettingsDialog::SettingsDialog(QObject *parent) :
 {
     fillPortsInfo();
 
-    QVariantMap map;
-    map["serialPortInfo"] = m_serialPortList.keys().first();
-    map["baudRate"] = QSerialPort::Baud9600;
-    map["dataBitsBox"] = QSerialPort::Data8;
-    map["parityBox"] = QSerialPort::NoParity;
-    map["stopBitsBox"] = QSerialPort::OneStop;
-    apply(map);
+    for(QString c_name : m_serialPortList.keys()){
+        QVariantMap map;
+        map["serialPortInfo"] = m_serialPortList[c_name].toStringList().first();
+        map["baudRate"] = QSerialPort::Baud9600;
+        map["dataBitsBox"] = QSerialPort::Data8;
+        map["parityBox"] = QSerialPort::NoParity;
+        map["stopBitsBox"] = QSerialPort::OneStop;
+        apply(map,c_name);
+    }
 }
 
 SettingsDialog::~SettingsDialog()
 {
 }
 
-SettingsDialog::Settings SettingsDialog::settings() const
+SettingsDialog::Settings SettingsDialog::settings(const QString &c_name) const
 {
-    return m_currentSettings;
+    return m_SettingsMap[c_name];
 }
 
 void SettingsDialog::fillPortsInfo()
@@ -47,7 +49,13 @@ void SettingsDialog::fillPortsInfo()
              << (info.vendorIdentifier() ? QString::number(info.vendorIdentifier(), 16) : blankString)
              << (info.productIdentifier() ? QString::number(info.productIdentifier(), 16) : blankString);
         qDebug() << info.portName();
-        m_serialPortList[info.portName()] = list;
+        QString c_name = "unknown";
+        if(description.startsWith("USB"))
+            c_name = "pressure";
+        else if(description.startsWith("Silicon"))
+            c_name = "vacuum";
+        
+        m_serialPortList[c_name] = list;
     }
 }
 
@@ -55,22 +63,22 @@ QVariantMap SettingsDialog::serialPortListRead() const{
     return m_serialPortList;
 }
 
-void SettingsDialog::apply(const QVariantMap& map)
+void SettingsDialog::apply(const QVariantMap& map, const QString &c_name)
 {
-    m_currentSettings.name = map["serialPortInfo"].toString();
+    m_SettingsMap[c_name].name = map["serialPortInfo"].toString();
     qDebug() << map["baudRate"].toInt();
-    m_currentSettings.baudRate = static_cast<QSerialPort::BaudRate>(map["baudRate"].toInt());
-    m_currentSettings.stringBaudRate = QString::number(m_currentSettings.baudRate);
+    m_SettingsMap[c_name].baudRate = static_cast<QSerialPort::BaudRate>(map["baudRate"].toInt());
+    m_SettingsMap[c_name].stringBaudRate = map["baudRate"].toString();
     qDebug() << map["dataBitsBox"].toInt();
-    m_currentSettings.dataBits = static_cast<QSerialPort::DataBits>(map["dataBitsBox"].toInt());
-    m_currentSettings.stringDataBits = map["dataBitsBox"].toString();
+    m_SettingsMap[c_name].dataBits = static_cast<QSerialPort::DataBits>(map["dataBitsBox"].toInt());
+    m_SettingsMap[c_name].stringDataBits = map["dataBitsBox"].toString();
 
-    m_currentSettings.parity = static_cast<QSerialPort::Parity>(map["parityBox"].toInt());
-    qDebug() << "Parity box: " << m_currentSettings.parity;
-    m_currentSettings.stringParity = map["parityBox"].toString();
-    m_currentSettings.stopBits = static_cast<QSerialPort::StopBits>(map["stopBitsBox"].toInt());
-    qDebug() << "stop bits: " <<  m_currentSettings.stopBits;
-    m_currentSettings.stringStopBits = map["stopBitsBox"].toString();
+    m_SettingsMap[c_name].parity = static_cast<QSerialPort::Parity>(map["parityBox"].toInt());
+    //qDebug() << "Parity box: " << m_currentSettings.parity;
+    m_SettingsMap[c_name].stringParity = map["parityBox"].toString();
+    m_SettingsMap[c_name].stopBits = static_cast<QSerialPort::StopBits>(map["stopBitsBox"].toInt());
+    //qDebug() << "stop bits: " <<  m_currentSettings.stopBits;
+    m_SettingsMap[c_name].stringStopBits = map["stopBitsBox"].toString();
 
     // m_currentSettings.flowControl = static_cast<QSerialPort::FlowControl>(map["flowControlBox"].toInt());
     // m_currentSettings.stringFlowControl = map["flowControlBox"].toString();
