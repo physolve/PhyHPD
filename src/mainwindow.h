@@ -53,7 +53,7 @@ private slots:
 private:
     void setLogText(const QString &text);
     void writeData(const QByteArray &data);
-
+    void shuttingOff();
     SettingsDialog *m_settings = nullptr;
     QSerialPort *m_serial = nullptr;
 
@@ -66,4 +66,6 @@ private:
     Data m_points;
 
     WriteLogFile m_writeLog;
+
+    uint8_t threshold;
 };

@@ -21,6 +21,7 @@ file(GLOB HPP_SOURCES src/*.h)
 file(GLOB CPP_LIBS lib/*.cpp)
 file(GLOB HPP_LIBS lib/*.h)
 
+
 qt_add_executable(${EXECUTABLE_NAME}
     ${CPP_SOURCES} ${HPP_SOURCES}
     ${CPP_LIBS} ${HPP_LIBS}

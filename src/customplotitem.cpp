@@ -150,9 +150,10 @@ void CustomPlotItem::backendData(QList<double> x, QList<double> y){
   lastPointKey = x.last();
   m_CustomPlot->xAxis->setRange(lastPointKey, 10, Qt::AlignRight); // means there a 10 sec
   m_CustomPlot->yAxis->rescale();
+  m_CustomPlot->rescaleAxes();
   //m_CustomPlot->yAxis->scaleRange(1.05, m_CustomPlot->yAxis->range().center());
   //m_CustomPlot->graph(0)->rescaleValueAxis(false);
-  //m_CustomPlot->yAxis->scaleRange(1.1, m_CustomPlot->yAxis->range().center());
+  m_CustomPlot->yAxis->scaleRange(1.1, m_CustomPlot->yAxis->range().center());
   m_CustomPlot->replot();
 }
 

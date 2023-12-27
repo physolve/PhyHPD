@@ -1,8 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Qt.labs.settings
-import QtQuick.Dialogs
+//import Qt.labs.settings
 
 import CustomPlot
 ApplicationWindow {
@@ -13,7 +12,6 @@ ApplicationWindow {
     title: qsTr("MHgrph")
     Material.theme: Material.Dark
     Material.accent: Material.Indigo
-
     GridLayout {
         id: grid
         anchors.fill: parent

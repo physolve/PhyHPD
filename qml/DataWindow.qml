@@ -9,10 +9,10 @@ Item{
         spacing: 10
         Button{
             id: connectBtn
-            text: (connectBtn.checked ? qsTr("Disconnect") : qsTr("Connect"))
+            text: connectBtn.checked ? qsTr("Disconnect") : qsTr("Connect")
             checkable: true
-            onToggled: {
-                (connectBtn.checked ? backend.openSerialPort : backend.closeSerialPort)
+            onClicked: {
+                connectBtn.checked ? backend.openSerialPort() : backend.closeSerialPort()
             }
         }
         ListView {
@@ -36,7 +36,7 @@ Item{
             id: configureBtn
             text: qsTr("Configure")
             onClicked: {
-                setiingsDialog.open()
+                setiingsDialog.show()
             }
         }
 
@@ -61,10 +61,10 @@ Item{
     Item{    
         SettingsDialog{
             id: setiingsDialog
-            parent: Overlay.overlay
-            padding: 0
-            x: 100
-            y: 200
+            //padding: 0
+            //anchors. centerIn: parent
+            //x: 100
+            //y: 500
         }
     }
 }

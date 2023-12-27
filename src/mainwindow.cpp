@@ -14,6 +14,8 @@ MainWindow::MainWindow(int &argc, char **argv)
     
     m_engine.addImportPath(":/");
 
+    qmlRegisterType<CustomPlotItem>("CustomPlot", 1, 0, "CustomPlotItem");
+
     const QUrl url(QString("qrc:/%1/qml/main.qml").arg(applicationName));
     QObject::connect(
                 &m_engine, &QQmlApplicationEngine::objectCreated, this,
@@ -21,7 +23,6 @@ MainWindow::MainWindow(int &argc, char **argv)
                     if(!obj && url == objUrl) QCoreApplication::exit(-1);
     },
     Qt::QueuedConnection);
-    qmlRegisterType<CustomPlotItem>("CustomPlot", 1, 0, "CustomPlotItem");
     m_engine.rootContext()->setContextProperty("backend", this);
     m_engine.rootContext()->setContextProperty("settingsDialog", m_settings);
     m_engine.load(url);
@@ -49,7 +50,7 @@ void MainWindow::openSerialPort()
     m_serial->setDataBits(p.dataBits);
     m_serial->setParity(p.parity);
     m_serial->setStopBits(p.stopBits);
-    //m_serial->setFlowControl(p.flowControl);
+    m_serial->setFlowControl(QSerialPort::NoFlowControl);
     if (m_serial->open(QIODevice::ReadWrite)) {
         //m_console->setEnabled(true);
         //m_console->setLocalEchoEnabled(p.localEchoEnabled);
@@ -85,13 +86,29 @@ void MainWindow::writeData(const QByteArray &data)
 void MainWindow::readData()
 {
     const QByteArray data = m_serial->readAll();
-    //m_console->putData(data);
-    
-    m_points.x.append(m_timePassed.elapsed()/1000);
+    qDebug() << QString::fromLocal8Bit(data);
+    //data format "+00.000\r"
+    // QString responce = QString::fromLocal8Bit(data);
+    // responce.remove(0,1);
+    // responce.chop(1);
+    // bool ok = true;
+    // auto result = responce.toDouble(&ok);
+    // if(result != 0 && ok)
+    //     m_points.y.append(result);
+    // else{
+    //     m_points.y.append(0);
+    //     if(++threshold>3){
+    //         shuttingOff();
+    //     }
+    // }
+    // m_points.x.append(m_timePassed.elapsed()/1000);
+    // emit pointsChanged(m_points.x, m_points.y);
+}
 
-    m_points.y.append(data.toDouble());
-
-    emit pointsChanged(m_points.x,m_points.y);
+void MainWindow::shuttingOff(){
+    qDebug() << "Wrong data in sensor!";
+    onReadButtonClicked(false);
+    //emit to qml status about error   
 }
 
 void MainWindow::handleError(QSerialPort::SerialPortError error)
@@ -105,6 +122,7 @@ void MainWindow::handleError(QSerialPort::SerialPortError error)
 void MainWindow::onReadButtonClicked(bool s)
 {
     if(s){
+        threshold = 0;
         m_timer->start(1000);
         m_timePassed.start();
     }
@@ -121,7 +139,7 @@ void MainWindow::processEvents(){
     //     return;
     
     // m_readValue.clear();
-    const QString query = "#011";
+    const QString query = "001M^\r";//"#011\r";
 
     setLogText(""); // log
 

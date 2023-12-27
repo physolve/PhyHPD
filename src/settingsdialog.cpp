@@ -9,7 +9,13 @@ SettingsDialog::SettingsDialog(QObject *parent) :
 {
     fillPortsInfo();
 
-    //apply();
+    QVariantMap map;
+    map["serialPortInfo"] = m_serialPortList.keys().first();
+    map["baudRate"] = QSerialPort::Baud9600;
+    map["dataBitsBox"] = QSerialPort::Data8;
+    map["parityBox"] = QSerialPort::NoParity;
+    map["stopBitsBox"] = QSerialPort::OneStop;
+    apply(map);
 }
 
 SettingsDialog::~SettingsDialog()
@@ -49,17 +55,21 @@ QVariantMap SettingsDialog::serialPortListRead() const{
     return m_serialPortList;
 }
 
-void SettingsDialog::apply(QVariantMap map)
+void SettingsDialog::apply(const QVariantMap& map)
 {
     m_currentSettings.name = map["serialPortInfo"].toString();
+    qDebug() << map["baudRate"].toInt();
     m_currentSettings.baudRate = static_cast<QSerialPort::BaudRate>(map["baudRate"].toInt());
     m_currentSettings.stringBaudRate = QString::number(m_currentSettings.baudRate);
+    qDebug() << map["dataBitsBox"].toInt();
     m_currentSettings.dataBits = static_cast<QSerialPort::DataBits>(map["dataBitsBox"].toInt());
     m_currentSettings.stringDataBits = map["dataBitsBox"].toString();
 
     m_currentSettings.parity = static_cast<QSerialPort::Parity>(map["parityBox"].toInt());
+    qDebug() << "Parity box: " << m_currentSettings.parity;
     m_currentSettings.stringParity = map["parityBox"].toString();
     m_currentSettings.stopBits = static_cast<QSerialPort::StopBits>(map["stopBitsBox"].toInt());
+    qDebug() << "stop bits: " <<  m_currentSettings.stopBits;
     m_currentSettings.stringStopBits = map["stopBitsBox"].toString();
 
     // m_currentSettings.flowControl = static_cast<QSerialPort::FlowControl>(map["flowControlBox"].toInt());

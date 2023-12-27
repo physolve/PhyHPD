@@ -30,7 +30,7 @@ public:
 
     QVariantMap serialPortListRead() const;
 
-    Q_INVOKABLE void apply(QVariantMap map);
+    Q_INVOKABLE void apply(const QVariantMap& map);
 
 private slots:
 

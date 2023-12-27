@@ -4,11 +4,17 @@ import QtQuick.Controls
 import QtQml.Models
 import QtQuick.Layouts
 
-Dialog {
+Window {
     id: dialog
-    //modal: false
-    //focus: true
-    standardButtons: Dialog.Apply
+    title: qsTr("Settings")
+    flags: Qt.Dialog
+    //modality: Qt.WindowModal
+    Material.theme: Material.Dark
+    Material.accent: Material.Indigo
+    color: "#303030"
+    //color: active ? palette.active.window : palette.inactive.window 
+    //palette.active.window: "peachpuff"
+    //palette.windowText: "brown"
     width: 500
     height: 300
     function showPortInfo(index){
@@ -23,7 +29,8 @@ Dialog {
         pidLabel.text = "Product Identifier: " + serialPortInfo[index][6]
     }
     RowLayout{
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
         anchors.margins: 10
         spacing: 15
         ColumnLayout{
@@ -43,6 +50,8 @@ Dialog {
             Label{
                 id: descriptionLabel
                 text: "Description: "
+                Layout.preferredWidth: dialog.width/2
+                elide: Text.ElideRight
             }
             Label{
                 id: manufacturerLabel
@@ -68,7 +77,6 @@ Dialog {
         GridLayout{
             columns: 2
             Layout.fillWidth: true
-
             Label{
                 text: qsTr("Parity:")
             }
@@ -76,6 +84,7 @@ Dialog {
                 id: parityCombo
                 Layout.fillWidth: true
                 model: ["No", "Even", "Odd", "Space", "Mark"]
+                currentIndex: 0
             }
             Label{
                 text: qsTr("Baud Rate:")
@@ -85,6 +94,7 @@ Dialog {
                 Layout.fillWidth: true
                 model: ["1200", "2400", "4800", "9600", 
                 "19200", "38400", "57600", "115200"]
+                currentIndex: 3
             }
             Label{
                 text: qsTr("Data Bits:")
@@ -94,6 +104,7 @@ Dialog {
                 Layout.fillWidth: true
                 valueRole: "value"
                 model: ["5", "6", "7", "8"]
+                currentIndex: 3
             }
             Label{
                 text: qsTr("Stop Bits:")
@@ -103,6 +114,7 @@ Dialog {
                 Layout.fillWidth: true
                 valueRole: "value"
                 model: ["1", "3", "2"] // ?
+                currentIndex: 0
             }
         }
         Item{
@@ -110,14 +122,20 @@ Dialog {
             Layout.fillWidth: true
         }
     }
-
-    onApplied: {
-        let result = {}
-        result["serialPortInfo"] = serialPorntInfoCmb.currentText
-        result["baudRate"] = baudCombo.currentValue
-        result["dataBitsBox"] = dataBitsCombo.currentValue
-        result["parityBox"] = parityCombo.currentValue
-        result["stopBitsBox"] = stopBitsCombo.currentValue
-        settingsDialog.apply(result)
+    Button{
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        anchors.margins: 10
+        text: qsTr("Apply")
+        onClicked: {
+            let result = {}
+            result["serialPortInfo"] = serialPorntInfoCmb.currentText
+            result["baudRate"] = baudCombo.currentText
+            result["dataBitsBox"] = dataBitsCombo.currentText
+            result["parityBox"] = parityCombo.currentIndex
+            result["stopBitsBox"] = stopBitsCombo.currentText
+            settingsDialog.apply(result)
+            dialog.close()
+        }
     }
 }
