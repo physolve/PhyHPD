@@ -64,6 +64,7 @@ private slots:
     void readData() override;
 private:
     void writeData();
+    void filterData(double &point);
     const QString query;
 };
 
@@ -76,5 +77,7 @@ private slots:
     void readData() override;
 private:
     void writeData();
+    void filterData(double &point);
     const QString query;
+    QByteArray m_data;
 };

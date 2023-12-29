@@ -7,6 +7,9 @@ static const char blankString[] = QT_TRANSLATE_NOOP("SettingsDialog", "N/A");
 SettingsDialog::SettingsDialog(QObject *parent) :
     QObject(parent)
 {
+    pressureConnected = false;
+    vacuumConnected = false;
+    
     fillPortsInfo();
 
     for(QString c_name : m_serialPortList.keys()){
@@ -50,10 +53,14 @@ void SettingsDialog::fillPortsInfo()
              << (info.productIdentifier() ? QString::number(info.productIdentifier(), 16) : blankString);
         qDebug() << info.portName();
         QString c_name = "unknown";
-        if(description.startsWith("USB"))
+        if(description.startsWith("USB")){
             c_name = "pressure";
+            pressureConnected = true;
+        }
+            
         else if(description.startsWith("Silicon"))
             c_name = "vacuum";
+            vacuumConnected = true;
         
         m_serialPortList[c_name] = list;
     }
@@ -84,4 +91,12 @@ void SettingsDialog::apply(const QVariantMap& map, const QString &c_name)
     // m_currentSettings.stringFlowControl = map["flowControlBox"].toString();
 
     // m_currentSettings.localEchoEnabled = map["localEchoCheckBox"].toBool();
+}
+
+bool SettingsDialog::isPressureConnected(){
+    return pressureConnected;
+}
+
+bool SettingsDialog::isVacuumConnected(){
+    return vacuumConnected;
 }

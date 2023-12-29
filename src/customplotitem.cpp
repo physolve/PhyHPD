@@ -36,13 +36,14 @@ void CustomPlotItem::initCustomPlot(int index) {
     m_CustomPlot->addGraph();
     m_CustomPlot->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::black, 1.5), QBrush(Qt::white), 9));
     m_CustomPlot->graph(0)->setPen(QPen(QColor(120, 120, 120), 2));
+    m_CustomPlot->graph(0)->setAdaptiveSampling(true);
     //m_CustomPlot->addGraph();
     //m_CustomPlot->graph(1)->setPen(QPen(Qt::black));
-
 
     QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
     timeTicker->setTimeFormat("%h:%m:%s");
     m_CustomPlot->xAxis->setTicker(timeTicker);
+    m_CustomPlot->yAxis->setRange(0.0, 1.0);
     m_CustomPlot->axisRect()->setupFullAxesBox(); //?
     m_CustomPlot->yAxis->setRange(0.0, 1.0);
 
@@ -94,9 +95,6 @@ void CustomPlotItem::initCustomPlot(int index) {
     axisRectGradient.setColorAt(0, QColor(80, 80, 80));
     axisRectGradient.setColorAt(1, QColor(30, 30, 30));
     m_CustomPlot->axisRect()->setBackground(axisRectGradient);
-
-
-
   }
   m_CustomPlot->replot();
 }
@@ -133,27 +131,18 @@ void CustomPlotItem::mouseDoubleClickEvent(QMouseEvent *event) {
 
 void CustomPlotItem::wheelEvent(QWheelEvent *event) { routeWheelEvents(event); }
 
-void CustomPlotItem::timerEvent(QTimerEvent * /*event*/) { // delete 
-  static double t, U, V;
-  U = ((double)rand() / RAND_MAX) * 5;
-  m_CustomPlot->graph(0)->addData(t, U);
-  V = ((double)rand() / RAND_MAX) * 5;
-  m_CustomPlot->graph(1)->addData(t, V);
-  //qDebug() << Q_FUNC_INFO << QString("Adding dot t = %1, S = %2").arg(t).arg(U);
-  t++;
-  m_CustomPlot->replot();
-}
-
 void CustomPlotItem::backendData(QList<double> x, QList<double> y){
   static double lastPointKey = 0;
   m_CustomPlot->graph(0)->setData(x, y);
   lastPointKey = x.last();
   m_CustomPlot->xAxis->setRange(lastPointKey, 10, Qt::AlignRight); // means there a 10 sec
   m_CustomPlot->yAxis->rescale();
-  m_CustomPlot->rescaleAxes();
+  m_CustomPlot->yAxis->setRangeUpper(y.last()*1.05);
+
+  //m_CustomPlot->rescaleAxes();
   //m_CustomPlot->yAxis->scaleRange(1.05, m_CustomPlot->yAxis->range().center());
   //m_CustomPlot->graph(0)->rescaleValueAxis(false);
-  m_CustomPlot->yAxis->scaleRange(1.1, m_CustomPlot->yAxis->range().center());
+  //m_CustomPlot->yAxis->scaleRange(1.1, m_CustomPlot->yAxis->range().center());
   m_CustomPlot->replot();
 }
 

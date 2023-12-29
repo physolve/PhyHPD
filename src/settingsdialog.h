@@ -34,13 +34,18 @@ public:
 
     Q_INVOKABLE void apply(const QVariantMap &map, const QString &c_name);
 
-private slots:
+    bool isPressureConnected();
+    bool isVacuumConnected();
+
+//private slots:
 
 private:
     void fillPortsInfo();
     void updateSettings();
 
     QMap<QString,Settings> m_SettingsMap;
-
     QVariantMap m_serialPortList; 
+
+    bool pressureConnected;
+    bool vacuumConnected;
 };

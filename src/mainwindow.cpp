@@ -36,16 +36,27 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::initController(){
-    m_pressure = new PressureController(m_settings->settings("pressure"));
-    connect(m_pressure, &Controller::logChanged, this, &MainWindow::logChanged);
-    m_engine.rootContext()->setContextProperty("pressureBack", m_pressure);
-    
-    m_vacuum = new VacuumController(m_settings->settings("vacuum"));
-    connect(m_vacuum, &Controller::logChanged, this, &MainWindow::logChanged);
-    m_engine.rootContext()->setContextProperty("vacuumBack", m_vacuum);
+    if(m_settings->isPressureConnected()){
+        m_pressure = new PressureController(m_settings->settings("pressure"));
+        connect(m_pressure, &Controller::logChanged, this, &MainWindow::logChanged);
+        m_engine.rootContext()->setContextProperty("pressureBack", m_pressure);
+    }
+    else{
+        setLogText("Pressure is not connected");
+    }
+    if(m_settings->isVacuumConnected()){
+        m_vacuum = new VacuumController(m_settings->settings("vacuum"));
+        connect(m_vacuum, &Controller::logChanged, this, &MainWindow::logChanged);
+        m_engine.rootContext()->setContextProperty("vacuumBack", m_vacuum);
+    }
+    else{
+        setLogText("Vacuum is not connected");
+    }
 }
 
 void MainWindow::onReadButtonClicked(bool s){
+    if(!m_settings->isPressureConnected()||!m_settings->isVacuumConnected())
+        return;
     if(s){
         m_pressure->startReading();
         m_vacuum->startReading();
@@ -57,11 +68,15 @@ void MainWindow::onReadButtonClicked(bool s){
 }
 
 void MainWindow::openSerialPort(){
+    if(!m_settings->isPressureConnected()||!m_settings->isVacuumConnected())
+        return;
     m_pressure->openSerialPort();
     m_vacuum->openSerialPort();
 }
 
 void MainWindow::closeSerialPort(){
+    if(!m_settings->isPressureConnected()||!m_settings->isVacuumConnected())
+        return;
     m_pressure->closeSerialPort();
     m_vacuum->closeSerialPort();
 }
