@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QSerialPort>
-#include <QElapsedTimer>
 #include <QVariant>
 
 class SettingsDialog : public QObject

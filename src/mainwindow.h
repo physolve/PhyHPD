@@ -5,6 +5,7 @@
 
 #include "settingsdialog.h"
 #include "controller.h"
+#include "demodata.h"
 #include "writelogfile.h"
 
 class MainWindow : public QApplication
@@ -32,9 +33,12 @@ private:
 
     SettingsDialog *m_settings = nullptr;
 
-    PressureController* m_pressure;
+    PressureController *m_pressure;
 
-    VacuumController* m_vacuum;
+    VacuumController *m_vacuum;
+
+    DemoData *m_demoPressure;
+    DemoData *m_demoVacuum;
 
     WriteLogFile m_writeLog;
 

@@ -3,7 +3,7 @@
 #include <QDebug>
 
 CustomPlotItem::CustomPlotItem(QQuickItem *parent)
-    : QQuickPaintedItem(parent), m_CustomPlot(nullptr), m_timerId(0), testTimer(0) {
+    : QQuickPaintedItem(parent), m_CustomPlot(nullptr), m_timerId(0), testTimer(0), rescalingON(true) {
   setFlag(QQuickItem::ItemHasContents, true);
   setAcceptedMouseButtons(Qt::AllButtons);
 
@@ -31,8 +31,10 @@ void CustomPlotItem::initCustomPlot(int index) {
     m_CustomPlot = new QCustomPlot();
 
     connect( m_CustomPlot, &QCustomPlot::destroyed, this, [=](){ qDebug() << QString(" QCustomPlot (%1) pointer is destroyed ").arg(index); });
-
     updateCustomPlotSize();
+    
+    m_CustomPlot->setOpenGl(true); // it's not working without some fckn include
+
     m_CustomPlot->addGraph();
     m_CustomPlot->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::black, 1.5), QBrush(Qt::white), 9));
     m_CustomPlot->graph(0)->setPen(QPen(QColor(120, 120, 120), 2));
@@ -111,44 +113,54 @@ void CustomPlotItem::paint(QPainter *painter) {
 }
 
 void CustomPlotItem::mousePressEvent(QMouseEvent *event) {
-  qDebug() << Q_FUNC_INFO;
+  //qDebug() << Q_FUNC_INFO;
   routeMouseEvents(event);
 }
 
 void CustomPlotItem::mouseReleaseEvent(QMouseEvent *event) {
-  qDebug() << Q_FUNC_INFO;
+  //qDebug() << Q_FUNC_INFO;
   routeMouseEvents(event);
+  //QQuickPaintedItem::mouseReleaseEvent(event);
 }
 
 void CustomPlotItem::mouseMoveEvent(QMouseEvent *event) {
+  rescalingON = false;
   routeMouseEvents(event);
 }
 
 void CustomPlotItem::mouseDoubleClickEvent(QMouseEvent *event) {
   qDebug() << Q_FUNC_INFO;
+  rescalingON = true;
   routeMouseEvents(event);
 }
 
-void CustomPlotItem::wheelEvent(QWheelEvent *event) { routeWheelEvents(event); }
+void CustomPlotItem::wheelEvent(QWheelEvent *event) { 
+  rescalingON = false;
+  routeWheelEvents(event); 
+}
 
 void CustomPlotItem::backendData(QList<double> x, QList<double> y){
   static double lastPointKey = 0;
   m_CustomPlot->graph(0)->setData(x, y);
   lastPointKey = x.last();
-  m_CustomPlot->xAxis->setRange(lastPointKey, 10, Qt::AlignRight); // means there a 10 sec
-  m_CustomPlot->yAxis->rescale();
-  m_CustomPlot->yAxis->setRangeUpper(y.last()*1.05);
-
+  if(rescalingON){
+    m_CustomPlot->xAxis->setRange(lastPointKey, 10, Qt::AlignRight); // means there a 10 sec
+    m_CustomPlot->yAxis->rescale();
+  }
+  m_CustomPlot->replot();
   //m_CustomPlot->rescaleAxes();
   //m_CustomPlot->yAxis->scaleRange(1.05, m_CustomPlot->yAxis->range().center());
   //m_CustomPlot->graph(0)->rescaleValueAxis(false);
   //m_CustomPlot->yAxis->scaleRange(1.1, m_CustomPlot->yAxis->range().center());
-  m_CustomPlot->replot();
 }
 
 void CustomPlotItem::graphClicked(QCPAbstractPlottable *plottable) {
   qDebug() << Q_FUNC_INFO
            << QString("Clicked on graph '%1 ").arg(plottable->name());
+}
+
+void CustomPlotItem::resetPos(){
+  rescalingON = true;
 }
 
 void CustomPlotItem::routeMouseEvents(QMouseEvent *event) {

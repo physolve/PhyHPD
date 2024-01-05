@@ -1,6 +1,8 @@
 #pragma once
 
 #include "settingsdialog.h"
+#include <QSerialPort>
+#include <QElapsedTimer>
 #include <QTimer>
 
 class SettingsDialog;
@@ -39,7 +41,7 @@ private slots:
 signals:
     void mySettingsChanged();
     void logChanged(QString);
-    void dataChanged(const QStringList& data);
+    //void dataChanged(const QStringList& data);
     void pointsChanged(const QList<quint64>& x, const QList<double>& y);
 
 protected:

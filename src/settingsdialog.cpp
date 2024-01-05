@@ -57,11 +57,10 @@ void SettingsDialog::fillPortsInfo()
             c_name = "pressure";
             pressureConnected = true;
         }
-            
-        else if(description.startsWith("Silicon"))
+        else if(description.startsWith("Silicon")){
             c_name = "vacuum";
             vacuumConnected = true;
-        
+        }
         m_serialPortList[c_name] = list;
     }
 }
