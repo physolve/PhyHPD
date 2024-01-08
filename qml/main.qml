@@ -13,6 +13,7 @@ ApplicationWindow {
     Material.theme: Material.Dark
     Material.accent: Material.Indigo
     function returnStack(object){
+        object.testFunction(true)
         baseContainer.append(object)
     }
     ObjectModel
@@ -23,68 +24,70 @@ ApplicationWindow {
         id: plotPressure
         Item {
             //id: itemPlotPressure
-            //width: 600
-            //height: 400
-             GridLayout {
-                columns: 3
-                rows: 2
-                anchors.fill: parent
-                columnSpacing: 0
-                rowSpacing: 0
-
-                CustomPlotItem {
-                    id: customPlotPressure
-                    //width: parent.width;  height: parent.height // resize
-                    width: 600
-                    height: 400
-                    Layout.columnSpan: 3
-                    Layout.rowSpan: 1
-                    Component.onCompleted: initCustomPlot(0)
-                    Component.onDestruction: testJSString(0)
-                    function testJSString(num) {
-                        let text = "I have been destroyed_ %1"
-                        console.log(text.arg(num))
-                    }
-                    
-                }
-                Connections {
-                    target: pressureBack 
-                    onPointsChanged: {
-                        customPlotPressure.backendData(x, y)
-                    }
+            width: 600
+            height: 400
+            CustomPlotItem {
+                id: customPlotPressure
+                width: parent.width;  height: parent.height-50 // resize
+                //width: 600
+                //height: 400
+                anchors.left: parent.left; anchors.top: parent.top
+                Layout.columnSpan: 3
+                Layout.rowSpan: 1
+                Component.onCompleted: initCustomPlot(0)
+                Component.onDestruction: testJSString(0)
+                function testJSString(num) {
+                    let text = "I have been destroyed_ %1"
+                    console.log(text.arg(num))
                 }
                 
-                RoundButton {
-                    width: 40
-                    height: 40
-                    text: "⟳"
-                    font.pixelSize: 18
-                    //Material.background: Material.Red
-                    //Material.roundedScale: Material.FullScale
-                    onClicked: customPlotPressure.resetPos()
+            }
+            Connections {
+                target: pressureBack 
+                onPointsChanged: {
+                    customPlotPressure.backendData(x, y)
                 }
-                RoundButton {
-                    width: 40
-                    height: 40
-                    text: "㍴"
-                    font.pixelSize: 18
-                    font.bold: true
-                    font.hintingPreference: Font.PreferNoHinting
-                    //Material.background:Material.Red
-                    //Material.roundedScale: Material.FullScale
-                    onClicked: customPlotPressure.resetPos()
-                }
-                RoundButton {
-                    width: 40
-                    height: 40
-                    text: "W"
-                    font.pixelSize: 18
-                    font.bold: true
-                    font.hintingPreference: Font.PreferNoHinting
-                    //Material.background:Material.Red
-                    //Material.roundedScale: Material.FullScale
-                    onClicked: detachPressure()
-                }
+            }
+            
+            RoundButton {
+                id: resetPosBtn
+                width: 40
+                height: 40
+                anchors.left: parent.left; anchors.top: customPlotPressure.bottom
+                text: "⟳"
+                font.pixelSize: 18
+                //Material.background: Material.Red
+                //Material.roundedScale: Material.FullScale
+                onClicked: customPlotPressure.resetPos()
+            }
+            RoundButton {
+                id: changeUnitBtn
+                width: 40
+                height: 40
+                anchors.left: resetPosBtn.right; anchors.top: customPlotPressure.bottom
+                text: "㍴"
+                font.pixelSize: 18
+                font.bold: true
+                font.hintingPreference: Font.PreferNoHinting
+                //Material.background:Material.Red
+                //Material.roundedScale: Material.FullScale
+                onClicked: customPlotPressure.resetPos()
+            }
+            RoundButton {
+                id: detachBtn
+                width: 40
+                height: 40
+                anchors.left: changeUnitBtn.right; anchors.top: customPlotPressure.bottom
+                text: "W"
+                font.pixelSize: 18
+                font.bold: true
+                font.hintingPreference: Font.PreferNoHinting
+                //Material.background:Material.Red
+                //Material.roundedScale: Material.FullScale
+                onClicked: detachPressure()
+            }
+            function testFunction(b){
+                detachBtn.visible = b   
             }
         }  
     }
@@ -154,6 +157,7 @@ ApplicationWindow {
                 id: bar
                 width: parent.width
                 Repeater{
+                    id: barRepeater
                     model: ["Pressure", "Vacuum"]
                     TabButton{
                         text: modelData
@@ -168,6 +172,18 @@ ApplicationWindow {
                 currentIndex: bar.currentIndex
                 Repeater {
                     model: baseContainer
+                    onItemAdded: {
+                        //index
+                        //item
+                        console.log("item added")
+                        //barRepeater.model.push(index)
+                    }
+                    onItemRemoved: {
+                        //index
+                        //item
+                        console.log("item removed")
+                        //barRepeater.model.splice(index)
+                    }
                 }
                 Component.onCompleted: {
                     let pressure = plotPressure.createObject()
@@ -185,15 +201,20 @@ ApplicationWindow {
             width: 600
             height: 450
             function changeStack(object){
+                object.testFunction(false)
                 container.append(object)
             }
-            StackLayout {
-                id: layout
+            Pane {
                 anchors.fill: parent
-                Repeater {
-                    model: ObjectModel
-                    {
-                        id: container
+                Material.theme: Material.Dark
+                StackLayout {
+                    id: layout
+                    anchors.fill: parent
+                    Repeater {
+                        model: ObjectModel
+                        {
+                            id: container
+                        }
                     }
                 }
             }
@@ -204,7 +225,8 @@ ApplicationWindow {
     }
     function detachPressure(){
         let window = plotComponent.createObject()
-        window.color = Material.color(Material.Red)
+        //window.color = Material.color(Material.Red)
+        baseContainer.remove(0)
         window.changeStack(baseContainer.get(0))
         window.show()
     }
