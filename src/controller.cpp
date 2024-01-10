@@ -90,9 +90,12 @@ void Controller::stopReading(){
 }
 
 void Controller::processEvents(){
-    setLogText("");
-
+    //setLogText("");
     writeData();
+}
+
+double Controller::getLastChanged(){
+    return m_points.y.last();
 }
 
 void Controller::setLogText(const QString &text)

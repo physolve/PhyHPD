@@ -27,6 +27,7 @@ signals:
 
 private slots:
     void setLogText(const QString &text);
+    void processEvents();
 
 private:
     QQmlApplicationEngine m_engine;
@@ -41,6 +42,8 @@ private:
     DemoData *m_demoVacuum;
 
     WriteLogFile m_writeLog;
-
+    QTimer *m_logTimer;
+    
+    QElapsedTimer m_programmTime;
     QString logText;
 };

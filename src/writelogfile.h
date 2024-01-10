@@ -11,5 +11,8 @@ public:
 	WriteLogFile(QObject *parent = 0);
 	~WriteLogFile();
 public slots:
-    void writeLine(QString line);
+    void writeLine(const QString &line);
+private:
+	QString fileName;
+	QFile file;
 };

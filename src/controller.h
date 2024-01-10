@@ -32,7 +32,7 @@ public:
     void stopReading();
     void openSerialPort();
     void closeSerialPort();
-
+    double getLastChanged();
 private slots:
     virtual void readData();
     void handleError(QSerialPort::SerialPortError error);

@@ -6,7 +6,7 @@
 #include <QtQuickControls2/QQuickStyle>
 
 MainWindow::MainWindow(int &argc, char **argv)
-    : QApplication(argc, argv), m_settings(new SettingsDialog)
+    : QApplication(argc, argv), m_settings(new SettingsDialog), m_writeLog(), m_logTimer(new QTimer)
 {
     QQuickStyle::setStyle("Material");
     QString applicationName = "MHgrph";
@@ -28,10 +28,16 @@ MainWindow::MainWindow(int &argc, char **argv)
     initController();
     
     m_engine.load(url);
+
+    connect(m_logTimer, &QTimer::timeout, this, &MainWindow::processEvents);
+
+    m_programmTime.start();
 }
 
 MainWindow::~MainWindow()
 {
+    m_logTimer->stop();
+    delete m_logTimer;
     delete m_settings;
 }
 
@@ -65,21 +71,26 @@ void MainWindow::onReadButtonClicked(bool s){
         if(s){
             m_demoPressure->startDemo();
             m_demoVacuum->startDemo();
+            m_logTimer->start(1000);
         }
         else{
             m_demoPressure->stopDemo();
             m_demoVacuum->stopDemo();
+            m_logTimer->stop();
         }
         return;
     }
     if(s){
         m_pressure->startReading();
         m_vacuum->startReading();
+        m_logTimer->start(1000);
     }
     else{
         m_pressure->stopReading();
         m_vacuum->stopReading();
+        m_logTimer->stop();
     }
+    
 }
 
 void MainWindow::openSerialPort(){
@@ -94,6 +105,26 @@ void MainWindow::closeSerialPort(){
         return;
     m_pressure->closeSerialPort();
     m_vacuum->closeSerialPort();
+}
+
+void MainWindow::processEvents(){
+    quint64 c_time = m_programmTime.elapsed()/1000;
+    double c_pressure = 0;
+    if(!m_settings->isPressureConnected()){
+        c_pressure = m_demoPressure->getLastChanged();
+    }
+    else{
+        c_pressure = m_pressure->getLastChanged();
+    }
+    double c_vacuum = 0;
+    if(!m_settings->isVacuumConnected()){
+        c_vacuum = m_demoVacuum->getLastChanged();
+    }
+    else{
+        c_vacuum = m_vacuum->getLastChanged();
+    }
+    QString line = QString("%1\t%2\t%3").arg(c_time).arg(c_pressure).arg(c_vacuum);
+    m_writeLog.writeLine(line);
 }
 
 void MainWindow::setLogText(const QString &text)

@@ -53,7 +53,7 @@ Item{
             font.pointSize: 14
             onToggled: backend.onReadButtonClicked(startBtn.checked)
         }
-        Label {
+        Label { // move to log view
             id: logTextDisplay
             color: "black"
             text: backend.logText

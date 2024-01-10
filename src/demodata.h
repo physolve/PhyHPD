@@ -13,6 +13,7 @@ public:
     ~DemoData();
     void startDemo();
     void stopDemo();
+    double getLastChanged();
 signals:
     void logChanged(QString);
     void pointsChanged(const QList<quint64>& x, const QList<double>& y);

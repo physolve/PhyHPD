@@ -1,9 +1,9 @@
 #include "writelogfile.h"
 
-WriteLogFile::WriteLogFile(QObject* parent) : QObject(parent){
-    QFile file(QString("log-%1.txt").arg(QDate::currentDate().toString()));
+WriteLogFile::WriteLogFile(QObject* parent) : QObject(parent),file(QString("log-%1.txt").arg(QDate::currentDate().toString())){
     if (!file.open(QIODevice::ReadWrite))
         return;
+    fileName = file.fileName();
     QString line;
     QString header = "Time\t\tElapsed\tPressure\tVacuum";
     QTextStream in(&file);
@@ -12,15 +12,13 @@ WriteLogFile::WriteLogFile(QObject* parent) : QObject(parent){
         QTextStream head(&file);
         head << header << "\n";
     }
+
 }
 WriteLogFile::~WriteLogFile(){
-
+    file.close();
 }
 
-void WriteLogFile::writeLine(QString line){
-    QFile file(QString("log-%1.txt").arg(QDate::currentDate().toString()));
-    if (!file.open(QIODevice::Append | QIODevice::Text))
-        return;
+void WriteLogFile::writeLine(const QString &line){
     QTextStream out(&file);
     out << QTime::currentTime().toString() << "\t";
     out << line << "\n";

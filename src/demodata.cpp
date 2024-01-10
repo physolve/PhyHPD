@@ -17,6 +17,11 @@ void DemoData::stopDemo(){
     m_timer->stop();
     m_timePassed.restart(); // ? 
 }
+
+double DemoData::getLastChanged(){
+    return m_points.y.last();
+}
+
 void DemoData::processEvents(){
     //quint32 value = QRandomGenerator::global()->bounded(0, 1);
     const double point = sin(m_timePassed.elapsed()/1000)*2+4;
