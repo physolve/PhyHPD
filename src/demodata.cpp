@@ -1,5 +1,5 @@
 #include "demodata.h"
-
+#include <QRandomGenerator>
 DemoData::DemoData(QObject *parent) : QObject(parent), m_timer(new QTimer), m_points("Flow",{0},{0})
 {
     connect(m_timer, &QTimer::timeout, this, &DemoData::processEvents);
@@ -18,8 +18,10 @@ void DemoData::stopDemo(){
     m_timePassed.restart(); // ? 
 }
 void DemoData::processEvents(){
-    const double point = sin(m_timePassed.elapsed()/1000);
+    //quint32 value = QRandomGenerator::global()->bounded(0, 1);
+    const double point = sin(m_timePassed.elapsed()/1000)*2+4;
     m_points.y.append(point);
     m_points.x.append(m_timePassed.elapsed()/1000);
     emit pointsChanged(m_points.x, m_points.y);
+    emit lastChanged(m_points.y.last());
 }

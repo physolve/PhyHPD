@@ -134,6 +134,7 @@ void PressureController::readData(){
     }
     m_points.x.append(m_timePassed.elapsed()/1000);
     emit pointsChanged(m_points.x, m_points.y);
+    emit lastChanged(m_points.y.last());
 }
 
 void PressureController::filterData(double &point){
@@ -176,6 +177,7 @@ void VacuumController::readData(){
     }
     m_points.x.append(m_timePassed.elapsed()/1000);
     emit pointsChanged(m_points.x, m_points.y);
+    emit lastChanged(m_points.y.last());
 }
 
 void VacuumController::filterData(double &point){

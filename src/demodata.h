@@ -16,6 +16,7 @@ public:
 signals:
     void logChanged(QString);
     void pointsChanged(const QList<quint64>& x, const QList<double>& y);
+    void lastChanged(double y);
 private slots:
     void processEvents();
 private:

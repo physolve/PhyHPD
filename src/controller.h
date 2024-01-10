@@ -43,7 +43,7 @@ signals:
     void logChanged(QString);
     //void dataChanged(const QStringList& data);
     void pointsChanged(const QList<quint64>& x, const QList<double>& y);
-
+    void lastChanged(double y);
 protected:
     void setLogText(const QString &text);
     QSerialPort *m_serial = nullptr;
@@ -62,6 +62,7 @@ class PressureController : public Controller
     Q_OBJECT
 public:
     PressureController(const SettingsDialog::Settings &settings, QObject *parent = nullptr);
+
 private slots:
     void readData() override;
 private:
