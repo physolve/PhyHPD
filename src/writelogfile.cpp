@@ -5,7 +5,7 @@ WriteLogFile::WriteLogFile(QObject* parent) : QObject(parent){
     if (!file.open(QIODevice::ReadWrite))
         return;
     QString line;
-    QString header = "Time\t\tElapsed\tValue";
+    QString header = "Time\t\tElapsed\tPressure\tVacuum";
     QTextStream in(&file);
     line = in.readLine();
     if (line != header) {

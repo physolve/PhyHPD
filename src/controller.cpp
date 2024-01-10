@@ -105,7 +105,7 @@ void Controller::setLogText(const QString &text)
 }
 
 PressureController::PressureController(const SettingsDialog::Settings &settings, QObject *parent) : 
-    Controller(settings,parent), query("#011\r")
+    Controller(settings,parent), query("#010\r")
 {
 }
 
@@ -120,10 +120,9 @@ void PressureController::readData(){
     responce.remove(0,1);
     responce.chop(1);
     bool ok = true;
-    auto result = responce.toDouble(&ok);
-    if(result != 0 && ok){
-        auto point = result;
-        filterData(point);
+    auto voltage = responce.toDouble(&ok);
+    if(voltage != 0 && ok){
+        auto point = filterData(voltage);
         m_points.y.append(point);
     }
     else{
@@ -137,8 +136,9 @@ void PressureController::readData(){
     emit lastChanged(m_points.y.last());
 }
 
-void PressureController::filterData(double &point){
-    point = abs(point);
+const double PressureController::filterData(double voltage){
+    double point = 2.6046 * voltage - 2.4978;
+    return point;
 }
 
 VacuumController::VacuumController(const SettingsDialog::Settings &settings, QObject *parent) : 
@@ -154,7 +154,7 @@ void VacuumController::readData(){
     m_data.append(m_serial->readAll());
     if(m_data.length()<12)
         return;
-    else qDebug() << "Message: " << m_data; 
+    //else qDebug() << "Message: " << m_data; 
     const QByteArray data = m_data;
     m_data.clear();
     //data format 001M100023D\r -> 1.000Ex (x = 23-20 = 3)
@@ -166,7 +166,7 @@ void VacuumController::readData(){
     int mantissa = responce.last(2).toInt()-20;
     if(result != 0 && ok){
         auto point = result*pow(10,mantissa);
-        filterData(point);
+        point = filterData(point);
         m_points.y.append(point);
     }
     else{
@@ -180,6 +180,8 @@ void VacuumController::readData(){
     emit lastChanged(m_points.y.last());
 }
 
-void VacuumController::filterData(double &point){
+const double VacuumController::filterData(double point){
+    
+    return point;
     //point = abs(point);
 }

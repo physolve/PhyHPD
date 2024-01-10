@@ -146,6 +146,7 @@ void CustomPlotItem::backendData(QList<double> x, QList<double> y){
   if(rescalingON){
     m_CustomPlot->xAxis->setRange(lastPointKey, 10, Qt::AlignRight); // means there a 10 sec
     m_CustomPlot->yAxis->rescale();
+    m_CustomPlot->yAxis->scaleRange(1.1);
   }
   m_CustomPlot->replot();
   //m_CustomPlot->rescaleAxes();

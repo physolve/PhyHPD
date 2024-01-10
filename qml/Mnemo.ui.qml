@@ -221,7 +221,7 @@ Rectangle {
                 width: 40
                 height: 20
                 color: "black"
-                text: slider2.value.toFixed(3) // changing to exp function
+                text: slider2.value.toFixed(2) // changing to exp function
                 anchors.verticalCenter: parent.verticalCenter
                 horizontalAlignment: Text.AlignHCenter
                 anchors.horizontalCenter: parent.horizontalCenter
