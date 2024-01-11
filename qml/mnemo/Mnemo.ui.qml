@@ -23,7 +23,7 @@ Rectangle {
         id: scheme
         width: 1072
         height: 785
-        source: "qrc:/MHgrph/qml/scheme.jpg"
+        source: "qrc:/MHgrph/qml/images/scheme.jpg"
         fillMode: Image.PreserveAspectFit
     }
     RoundButton {
