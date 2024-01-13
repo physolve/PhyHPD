@@ -129,8 +129,8 @@ Rectangle {
 
     Rectangle {
         id: sliderPlacer1
-        x: 444
-        y: 248
+        x: 817
+        y: 355
         width: 90
         height: 90
         radius: 45
@@ -181,8 +181,8 @@ Rectangle {
 
     Rectangle {
         id: sliderPlacer2
-        x: 817
-        y: 355
+        x: 444
+        y: 248
         width: 90
         height: 90
         color: "#d3d3d3"
