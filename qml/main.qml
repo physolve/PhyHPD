@@ -31,35 +31,48 @@ ApplicationWindow {
                 }
             }
         }
-        ColumnLayout{
+        Item{
             SplitView.minimumWidth: 500
             SplitView.preferredWidth: 670
-            SplitView.maximumWidth: 700
             TabBar {
                 id: barMain
                 width: parent.width
+                anchors.top: parent.top
+                anchors.left: parent.left
+                //anchors.right: parent.right
+                //height: 100
                 Repeater{
                     id: barMainRepeater
-                    model: ["Graph", "Settings"]
+                    model: ["Graph", "Experiment", "Settings"]
                     TabButton{
                         text: modelData
-                        width: Math.max(100, barMain.width/5)
+                        width: Math.max(120, barMain.width/3)
                     }
                 }
             }
             StackLayout {
                 id: layoutMain
-                Layout.fillWidth: true
+                //Layout.fillWidth: true
                 //width: 600
                 //height: 800
+                anchors.top: barMain.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                //width: parent.width
                 currentIndex: barMain.currentIndex
                 Item{
-                    Layout.fillHeight: true
+                    //Layout.fillHeight: true
                     Graphs{
                     }
                 }   
                 Item{
-                    Layout.fillHeight: true
+                    //Layout.fillHeight: true
+                    Experimental{
+                    }
+                }
+                Item{
+                    //Layout.fillHeight: true
                     DataWindow{
                     }
                 }

@@ -7,6 +7,7 @@
 #include "controller.h"
 #include "demodata.h"
 #include "writelogfile.h"
+#include "exptable.h"
 
 class MainWindow : public QApplication
 {
@@ -30,7 +31,6 @@ private slots:
     void processEvents();
 
 private:
-    QQmlApplicationEngine m_engine;
 
     SettingsDialog *m_settings = nullptr;
 
@@ -46,4 +46,7 @@ private:
     
     QElapsedTimer m_programmTime;
     QString logText;
+
+    ExpTable m_expTable;
+    QQmlApplicationEngine m_engine;
 };

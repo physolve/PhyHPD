@@ -3,7 +3,9 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 Item{
-    anchors.fill: parent
+    width: parent.width
+    height: parent.height
+    //anchors.fill: parent
     ColumnLayout{
         anchors.centerIn: parent
         spacing: 10

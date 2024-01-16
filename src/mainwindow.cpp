@@ -24,6 +24,7 @@ MainWindow::MainWindow(int &argc, char **argv)
     Qt::QueuedConnection);
     m_engine.rootContext()->setContextProperty("backend", this);
     m_engine.rootContext()->setContextProperty("settingsDialog", m_settings);
+    m_engine.rootContext()->setContextProperty("table_model", &m_expTable);
     
     initController();
     

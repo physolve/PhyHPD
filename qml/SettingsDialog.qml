@@ -21,6 +21,9 @@ Window {
 
     Component.onCompleted:{
         let serialPortInfo = settingsDialog.serialPortList[c_name]
+        if(serialPortInfo === undefined) {
+            return;
+        }
         descriptionLabel.text = "Description: " + serialPortInfo[1]
         manufacturerLabel.text = "Manufacturer: " + serialPortInfo[2]
         serialNumberLabel.text = "Serial number: " + serialPortInfo[3]
