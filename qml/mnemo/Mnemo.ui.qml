@@ -6,30 +6,36 @@ import QtQuick.Controls.Material
 Rectangle {
     id: rectangle
     width: 1080
-    height: 790
+    height: 760
     color: "transparent"
     Connections {
-        target: pressureBack 
-        function onLastChanged(y) { slider1.value = y }
+        target: pressureBack
+        function onLastChanged(y) {
+            slider1.value = y
+        }
     }
     Connections {
-        target: vacuumBack 
-        function onLastChanged(y) { slider2.value = y }
+        target: vacuumBack
+        function onLastChanged(y) {
+            slider2.value = y
+        }
     }
     //color: Constants.backgroundColor
     Material.theme: Material.Dark
     Material.accent: Material.Indigo
     Image {
         id: scheme
-        width: 1072
-        height: 785
+        x: 0
+        y: 0
+        width: 1080
+        height: 760
         source: "qrc:/MHgrph/qml/images/scheme.jpg"
         fillMode: Image.PreserveAspectFit
     }
     RoundButton {
         id: valve1
-        x: 680
-        y: 320
+        x: 400
+        y: 556
         width: 46
         height: 46
         checkable: true
@@ -48,8 +54,8 @@ Rectangle {
     }
     RoundButton {
         id: valve2
-        x: 680
-        y: 444
+        x: 669
+        y: 556
         width: 46
         height: 46
         checkable: true
@@ -68,8 +74,8 @@ Rectangle {
     }
     RoundButton {
         id: valve3
-        x: 680
-        y: 444
+        x: 669
+        y: 451
         width: 46
         height: 46
         checkable: true
@@ -88,8 +94,8 @@ Rectangle {
     }
     RoundButton {
         id: valve4
-        x: 680
-        y: 561
+        x: 672
+        y: 326
         width: 46
         height: 46
         checkable: true
@@ -106,31 +112,11 @@ Rectangle {
             border.width: 2
         }
     }
-    RoundButton {
-        id: valve5
-        x: 354
-        y: 561
-        width: 46
-        height: 46
-        checkable: true
-        Material.background: valve5.checked ? Material.Amber : Material.BlueGrey
-        Material.elevation: 6
-        Rectangle {
-            anchors.centerIn: parent
-            width: 36
-            height: 36
-            //Material.background: Material.Blue
-            color: "transparent"
-            radius: 18
-            border.color: valve5.checked ? "#bac6cc" : "#4b90e4"
-            border.width: 2
-        }
-    }
 
     Rectangle {
         id: sliderPlacer1
-        x: 817
-        y: 355
+        x: 763
+        y: 365
         width: 90
         height: 90
         radius: 45
@@ -181,7 +167,7 @@ Rectangle {
 
     Rectangle {
         id: sliderPlacer2
-        x: 444
+        x: 462
         y: 248
         width: 90
         height: 90
