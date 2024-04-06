@@ -1,8 +1,7 @@
 #include "controller.h"
 
 Controller::Controller(const SettingsDialog::Settings &settings, QObject *parent) : 
-    QObject(parent), m_settings(settings), m_timer(new QTimer), m_points("Flow",{0},{0}),
-    m_serial(new QSerialPort(this))
+    QObject(parent), m_settings(settings), m_timer(new QTimer), m_serial(new QSerialPort(this))
 {
     connect(m_serial, &QSerialPort::errorOccurred, this, &Controller::handleError);
 
@@ -86,7 +85,7 @@ void Controller::startReading()
 void Controller::stopReading(){
     m_timer->stop();
     m_timePassed.restart();
-    m_points.clearPoints();
+    //m_points.clearPoints();
 }
 
 void Controller::processEvents(){
@@ -94,9 +93,9 @@ void Controller::processEvents(){
     writeData();
 }
 
-double Controller::getLastChanged(){
-    return m_points.y.last();
-}
+// double Controller::getLastChanged(){
+//     return m_points.y.last();
+// }
 
 void Controller::setLogText(const QString &text)
 {
@@ -108,22 +107,26 @@ void Controller::setLogText(const QString &text)
 }
 
 PressureController::PressureController(const SettingsDialog::Settings &settings, QObject *parent) : 
-    Controller(settings,parent), query("#010\r")
+    Controller(settings,parent), query("#010\r"), m_pressure("Pressure",{0},{0}), m_vacuum("Vacuum",{0},{0})
 {
 }
-
+// #010\r to read only first channel, #000\r to read all channels, but what is syntax? 
 void PressureController::writeData(){
     m_serial->write(query.toLocal8Bit());
 }
 
 void PressureController::readData(){
     const QByteArray data = m_serial->readAll();
-    //data format "+00.000\r"
+    //data format "+00.000\r" For ONE channel
+    //data format:
+
     QString responce = QString::fromLocal8Bit(data);
     responce.remove(0,1);
     responce.chop(1);
+    
     bool ok = true;
     auto voltage = responce.toDouble(&ok);
+    
     if(voltage != 0 && ok){
         auto point = filterData(voltage);
         m_points.y.append(point);
@@ -134,7 +137,9 @@ void PressureController::readData(){
             shuttingOff();
         }
     }
+    
     m_points.x.append(m_timePassed.elapsed()/1000);
+    
     emit pointsChanged(m_points.x, m_points.y);
     emit lastChanged(m_points.y.last());
 }
@@ -144,47 +149,9 @@ const double PressureController::filterData(double voltage){
     return point;
 }
 
-VacuumController::VacuumController(const SettingsDialog::Settings &settings, QObject *parent) : 
-    Controller(settings,parent), query("001M^\r")
-{
-}
-
-void VacuumController::writeData(){
-    m_serial->write(query.toLocal8Bit());
-}
-
-void VacuumController::readData(){
-    m_data.append(m_serial->readAll());
-    if(m_data.length()<12)
-        return;
-    //else qDebug() << "Message: " << m_data; 
-    const QByteArray data = m_data;
-    m_data.clear();
-    //data format 001M100023D\r -> 1.000Ex (x = 23-20 = 3)
-    QString responce = QString::fromLocal8Bit(data);
-    responce.remove(0,4);
-    responce.chop(2);
-    bool ok = true;
-    double result = responce.first(4).toDouble(&ok)/1000.0;
-    int mantissa = responce.last(2).toInt()-20;
-    if(result != 0 && ok){
-        auto point = result*pow(10,mantissa);
-        point = filterData(point);
-        m_points.y.append(point);
-    }
-    else{
-        m_points.y.append(0);
-        if(++threshold>3){
-            shuttingOff();
-        }
-    }
-    m_points.x.append(m_timePassed.elapsed()/1000);
-    emit pointsChanged(m_points.x, m_points.y);
-    emit lastChanged(m_points.y.last());
-}
-
-const double VacuumController::filterData(double point){
-    
-    return point;
-    //point = abs(point);
+QMap<QString, double> PressureController::getLastChanged(){
+    QMap<QString, double> points;
+    points[m_pressure.name] = m_pressure.y.last(); 
+    points[m_vacuum.name] = m_vacuum.y.last(); 
+    return points;
 }

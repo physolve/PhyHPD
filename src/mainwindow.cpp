@@ -54,17 +54,17 @@ void MainWindow::initController(){
         connect(m_demoPressure, &DemoData::logChanged, this, &MainWindow::logChanged);
         m_engine.rootContext()->setContextProperty("pressureBack", m_demoPressure);
     }
-    if(m_settings->isVacuumConnected()){
-        m_vacuum = new VacuumController(m_settings->settings("vacuum"));
-        connect(m_vacuum, &Controller::logChanged, this, &MainWindow::logChanged);
-        m_engine.rootContext()->setContextProperty("vacuumBack", m_vacuum);
-    }
-    else{
-        setLogText("Vacuum is not connected\n Switching to Demo");
-        m_demoVacuum = new DemoData;
-        connect(m_demoVacuum, &DemoData::logChanged, this, &MainWindow::logChanged);
-        m_engine.rootContext()->setContextProperty("vacuumBack", m_demoVacuum);
-    }
+    // if(m_settings->isVacuumConnected()){
+    //     m_vacuum = new VacuumController(m_settings->settings("vacuum"));
+    //     connect(m_vacuum, &Controller::logChanged, this, &MainWindow::logChanged);
+    //     m_engine.rootContext()->setContextProperty("vacuumBack", m_vacuum);
+    // }
+    // else{
+    //     setLogText("Vacuum is not connected\n Switching to Demo");
+    //     m_demoVacuum = new DemoData;
+    //     connect(m_demoVacuum, &DemoData::logChanged, this, &MainWindow::logChanged);
+    //     m_engine.rootContext()->setContextProperty("vacuumBack", m_demoVacuum);
+    // }
 }
 
 void MainWindow::onReadButtonClicked(bool s){

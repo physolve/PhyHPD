@@ -32,7 +32,7 @@ public:
     void stopReading();
     void openSerialPort();
     void closeSerialPort();
-    double getLastChanged();
+    
 private slots:
     virtual void readData();
     void handleError(QSerialPort::SerialPortError error);
@@ -47,7 +47,6 @@ signals:
 protected:
     void setLogText(const QString &text);
     QSerialPort *m_serial = nullptr;
-    Data m_points;
     QElapsedTimer m_timePassed;
     uint8_t threshold;
 private:
@@ -62,25 +61,13 @@ class PressureController : public Controller
     Q_OBJECT
 public:
     PressureController(const SettingsDialog::Settings &settings, QObject *parent = nullptr);
-
+    QMap<QString,double> getLastChanged();
 private slots:
     void readData() override;
 private:
     void writeData();
     const double filterData(double voltage);
     const QString query;
-};
-
-class VacuumController : public Controller
-{
-    Q_OBJECT
-public:
-    VacuumController(const SettingsDialog::Settings &settings, QObject *parent = nullptr);
-private slots:
-    void readData() override;
-private:
-    void writeData();
-    const double filterData(double point);
-    const QString query;
-    QByteArray m_data;
+    Data m_pressure;
+    Data m_vacuum;
 };
