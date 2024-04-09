@@ -36,10 +36,7 @@ private:
 
     PressureController *m_pressure;
 
-    VacuumController *m_vacuum;
-
     DemoData *m_demoPressure;
-    DemoData *m_demoVacuum;
 
     WriteLogFile m_writeLog;
     QTimer *m_logTimer;

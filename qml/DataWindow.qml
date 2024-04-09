@@ -33,21 +33,12 @@ Item{
                 }
             }
         }
-        RowLayout{
-            Button{
+        Button{
                 id: configurePressureBtn
                 text: qsTr("Configure pressure")
                 onClicked: {
                     pressureDialog.show()
                 }
-            }
-            Button{
-                id: configureVacuumBtn
-                text: qsTr("Configure vacuum")
-                onClicked: {
-                    vacuumDialog.show()
-                }
-            }
         }
         Switch {
             id: startBtn
@@ -71,16 +62,6 @@ Item{
         SettingsDialog{
             id: pressureDialog
             c_name: "pressure"
-            //padding: 0
-            //anchors. centerIn: parent
-            //x: 100
-            //y: 500
-        }
-    }
-    Item{    
-        SettingsDialog{
-            id: vacuumDialog
-            c_name: "vacuum"
             //padding: 0
             //anchors. centerIn: parent
             //x: 100

@@ -62,11 +62,17 @@ class PressureController : public Controller
 public:
     PressureController(const SettingsDialog::Settings &settings, QObject *parent = nullptr);
     QMap<QString,double> getLastChanged();
+signals:
+    void pointsPressureChanged(const QList<quint64>& x, const QList<double>& y);
+    void pointsVacuumChanged(const QList<quint64>& x, const QList<double>& y);
+    void lastPressureChanged(double y);
+    void lastVacuumChanged(double y);
 private slots:
     void readData() override;
 private:
     void writeData();
-    const double filterData(double voltage);
+    const double filterData_pr(double voltage);
+    const double filterData_vac(double voltage);
     const QString query;
     Data m_pressure;
     Data m_vacuum;

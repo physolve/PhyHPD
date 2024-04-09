@@ -54,76 +54,56 @@ void MainWindow::initController(){
         connect(m_demoPressure, &DemoData::logChanged, this, &MainWindow::logChanged);
         m_engine.rootContext()->setContextProperty("pressureBack", m_demoPressure);
     }
-    // if(m_settings->isVacuumConnected()){
-    //     m_vacuum = new VacuumController(m_settings->settings("vacuum"));
-    //     connect(m_vacuum, &Controller::logChanged, this, &MainWindow::logChanged);
-    //     m_engine.rootContext()->setContextProperty("vacuumBack", m_vacuum);
-    // }
-    // else{
-    //     setLogText("Vacuum is not connected\n Switching to Demo");
-    //     m_demoVacuum = new DemoData;
-    //     connect(m_demoVacuum, &DemoData::logChanged, this, &MainWindow::logChanged);
-    //     m_engine.rootContext()->setContextProperty("vacuumBack", m_demoVacuum);
-    // }
 }
 
 void MainWindow::onReadButtonClicked(bool s){
-    if(!m_settings->isPressureConnected()||!m_settings->isVacuumConnected()){
+    if(!m_settings->isPressureConnected()){
         if(s){
             m_demoPressure->startDemo();
-            m_demoVacuum->startDemo();
             m_logTimer->start(1000);
         }
         else{
             m_demoPressure->stopDemo();
-            m_demoVacuum->stopDemo();
             m_logTimer->stop();
         }
         return;
     }
     if(s){
         m_pressure->startReading();
-        m_vacuum->startReading();
         m_logTimer->start(1000);
     }
     else{
         m_pressure->stopReading();
-        m_vacuum->stopReading();
         m_logTimer->stop();
     }
     
 }
 
 void MainWindow::openSerialPort(){
-    if(!m_settings->isPressureConnected()||!m_settings->isVacuumConnected())
+    if(!m_settings->isPressureConnected())
         return;
     m_pressure->openSerialPort();
-    m_vacuum->openSerialPort();
 }
 
 void MainWindow::closeSerialPort(){
-    if(!m_settings->isPressureConnected()||!m_settings->isVacuumConnected())
+    if(!m_settings->isPressureConnected())
         return;
     m_pressure->closeSerialPort();
-    m_vacuum->closeSerialPort();
 }
 
 void MainWindow::processEvents(){
     quint64 c_time = m_programmTime.elapsed()/1000;
     double c_pressure = 0;
-    if(!m_settings->isPressureConnected()){
-        c_pressure = m_demoPressure->getLastChanged();
-    }
-    else{
-        c_pressure = m_pressure->getLastChanged();
-    }
     double c_vacuum = 0;
-    if(!m_settings->isVacuumConnected()){
-        c_vacuum = m_demoVacuum->getLastChanged();
+    if(!m_settings->isPressureConnected()){
+        c_vacuum = c_pressure = m_demoPressure->getLastChanged();
     }
     else{
-        c_vacuum = m_vacuum->getLastChanged();
+        auto c_map = m_pressure->getLastChanged();
+        c_pressure = c_map["pressure"];
+        c_vacuum = c_map["vacuum"];
     }
+    
     QString line = QString("%1\t%2\t%3").arg(c_time).arg(c_pressure).arg(c_vacuum);
     m_writeLog.writeLine(line);
 }

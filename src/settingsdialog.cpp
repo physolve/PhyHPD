@@ -8,7 +8,6 @@ SettingsDialog::SettingsDialog(QObject *parent) :
     QObject(parent)
 {
     pressureConnected = false;
-    vacuumConnected = false;
     
     fillPortsInfo();
 
@@ -57,10 +56,6 @@ void SettingsDialog::fillPortsInfo()
             c_name = "pressure";
             pressureConnected = true;
         }
-        else if(description.startsWith("Silicon")){
-            c_name = "vacuum";
-            vacuumConnected = true;
-        }
         m_serialPortList[c_name] = list;
     }
 }
@@ -94,8 +89,4 @@ void SettingsDialog::apply(const QVariantMap& map, const QString &c_name)
 
 bool SettingsDialog::isPressureConnected(){
     return pressureConnected;
-}
-
-bool SettingsDialog::isVacuumConnected(){
-    return vacuumConnected;
 }

@@ -52,7 +52,7 @@ void Controller::closeSerialPort()
 
 void Controller::writeData()
 {
-    const QString query = "#011\r"; 
+    const QString query = "#01\r"; 
     m_serial->write(query.toLocal8Bit());
 }
 
@@ -118,34 +118,59 @@ void PressureController::writeData(){
 void PressureController::readData(){
     const QByteArray data = m_serial->readAll();
     //data format "+00.000\r" For ONE channel
-    //data format:
+    //data format: +000.00+000.00+000.00...+000.00\r
+
+    // QString responce = QString::fromLocal8Bit(data);
+    // responce.remove(0,1);
+    // responce.chop(1);
 
     QString responce = QString::fromLocal8Bit(data);
-    responce.remove(0,1);
     responce.chop(1);
-    
+    QStringList channelsVoltage = responce.split('+');
+
     bool ok = true;
-    auto voltage = responce.toDouble(&ok);
-    
-    if(voltage != 0 && ok){
-        auto point = filterData(voltage);
-        m_points.y.append(point);
+
+    auto voltagePressure = channelsVoltage.at(0).toDouble(&ok);
+    auto voltageVacuum = channelsVoltage.at(1).toDouble(&ok);
+
+    if(voltagePressure != 0 && ok){
+        auto point = filterData_pr(voltagePressure);
+        m_pressure.y.append(point);
     }
     else{
-        m_points.y.append(0);
+        m_pressure.y.append(0);
+        if(++threshold>3){
+            shuttingOff();
+        }
+    }
+
+    if(voltageVacuum != 0 && ok){
+        auto point = filterData_vac(voltageVacuum);
+        m_vacuum.y.append(point);
+    }
+    else{
+        m_vacuum.y.append(0);
         if(++threshold>3){
             shuttingOff();
         }
     }
     
-    m_points.x.append(m_timePassed.elapsed()/1000);
-    
-    emit pointsChanged(m_points.x, m_points.y);
-    emit lastChanged(m_points.y.last());
+    m_pressure.x.append(m_timePassed.elapsed()/1000);
+    m_vacuum.x.append(m_timePassed.elapsed()/1000);
+
+    emit pointsPressureChanged(m_pressure.x, m_pressure.y);
+    emit pointsVacuumChanged(m_vacuum.x, m_vacuum.y);
+    emit lastPressureChanged(m_pressure.y.last());
+    emit lastVacuumChanged(m_vacuum.y.last());
 }
 
-const double PressureController::filterData(double voltage){
+const double PressureController::filterData_pr(double voltage){
     double point = 2.6046 * voltage - 2.4978;
+    return point;
+}
+
+const double PressureController::filterData_vac(double voltage){
+    double point = 1 * voltage - 0;
     return point;
 }
 

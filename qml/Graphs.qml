@@ -33,7 +33,7 @@ Item{
             }
             Connections {
                 target: pressureBack 
-                function onPointsChanged(x,y) { customPlotPressure.backendData(x, y) }
+                function pointsPressureChanged(x,y) { customPlotPressure.backendData(x, y) }
             }
             
             RoundButton {
@@ -78,54 +78,6 @@ Item{
             }
         }  
     }
-    Component{
-        id: plotVacuum
-        Item {
-            width: 600
-            height: 400
-            id: itemPlotVacuum
-            CustomPlotItem {
-                id: customPlotVacuum
-                width: parent.width;  height: parent.height // resize
-                Component.onCompleted: initCustomPlot(1)
-                Component.onDestruction: testJSString(1)
-                function testJSString(num) {
-                    let text = "I have been destroyed_ %1"
-                    console.log(text.arg(num))
-                }
-                RoundButton {
-                    x:-40
-                    y:10
-                    width: 40
-                    height: 40
-                    text: "⟳"
-                    font.pixelSize: 18
-                    font.bold: true
-                    //Material.background:Material.Red
-                    //Material.roundedScale: Material.FullScale
-                    onClicked: customPlotVacuum.resetPos()
-                }
-                RoundButton {
-                    x:-40
-                    y:50
-                    width: 40
-                    height: 40
-                    text: "㍴"
-                    font.pixelSize: 18
-                    font.bold: true
-                    font.hintingPreference: Font.PreferNoHinting
-                    //Material.background:Material.Red
-                    //Material.roundedScale: Material.FullScale
-                    onClicked: customPlotVacuum.resetPos()
-                }
-            }
-            Connections {
-                target: vacuumBack 
-                function onPointsChanged(x,y) { customPlotVacuum.backendData(x, y) }
-            }
-        }
-    }
-
 
     ColumnLayout{
         TabBar {
@@ -163,8 +115,8 @@ Item{
             Component.onCompleted: {
                 let pressure = plotPressure.createObject()
                 baseContainer.append(pressure)
-                let vacuum = plotVacuum.createObject()
-                baseContainer.append(vacuum)
+                // let vacuum = plotVacuum.createObject()
+                // baseContainer.append(vacuum)
             }
         }
     }

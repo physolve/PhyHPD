@@ -34,7 +34,6 @@ public:
     Q_INVOKABLE void apply(const QVariantMap &map, const QString &c_name);
 
     bool isPressureConnected();
-    bool isVacuumConnected();
 
 //private slots:
 
@@ -46,5 +45,4 @@ private:
     QVariantMap m_serialPortList; 
 
     bool pressureConnected;
-    bool vacuumConnected;
 };
