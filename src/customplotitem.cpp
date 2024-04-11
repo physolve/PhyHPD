@@ -32,15 +32,15 @@ void CustomPlotItem::initCustomPlot(int index) {
 
     connect( m_CustomPlot, &QCustomPlot::destroyed, this, [=](){ qDebug() << QString(" QCustomPlot (%1) pointer is destroyed ").arg(index); });
     updateCustomPlotSize();
-    
+
     m_CustomPlot->setOpenGl(true); // it's not working without some fckn include
 
     m_CustomPlot->addGraph();
     m_CustomPlot->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::black, 1.5), QBrush(Qt::white), 9));
     m_CustomPlot->graph(0)->setPen(QPen(QColor(120, 120, 120), 2));
     m_CustomPlot->graph(0)->setAdaptiveSampling(true);
-    //m_CustomPlot->addGraph();
-    //m_CustomPlot->graph(1)->setPen(QPen(Qt::black));
+    m_CustomPlot->graph()->setName("zero");
+    m_plotNames << "zero";
 
     QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
     timeTicker->setTimeFormat("%h:%m:%s");
@@ -62,7 +62,7 @@ void CustomPlotItem::initCustomPlot(int index) {
     //startTimer(500);
 
     connect(m_CustomPlot, &QCustomPlot::afterReplot, this,
-            &CustomPlotItem::onCustomReplot);
+    &CustomPlotItem::onCustomReplot);
 
     qDebug() << QString("QCustomplot (%1) Initialized").arg(index);
 
@@ -99,6 +99,16 @@ void CustomPlotItem::initCustomPlot(int index) {
     m_CustomPlot->axisRect()->setBackground(axisRectGradient);
   }
   m_CustomPlot->replot();
+}
+
+void CustomPlotItem::placeGraph(const QString &name){
+  m_CustomPlot->addGraph();
+  // m_CustomPlot->graph() the Last 
+  m_CustomPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::blue, 1.5), QBrush(Qt::white), 9));
+  m_CustomPlot->graph()->setPen(QPen(QColor(120, 120, 120), 2));
+  m_CustomPlot->graph()->setAdaptiveSampling(true);
+  m_CustomPlot->graph()->setName(name);
+  m_plotNames << name;
 }
 
 void CustomPlotItem::paint(QPainter *painter) {
@@ -139,9 +149,16 @@ void CustomPlotItem::wheelEvent(QWheelEvent *event) {
   routeWheelEvents(event); 
 }
 
-void CustomPlotItem::backendData(QList<double> x, QList<double> y){
+void CustomPlotItem::backendData(const QString &name, const QList<double> &x, const QList<double> &y){
+
+  // placing data by name
+
   static double lastPointKey = 0;
-  m_CustomPlot->graph(0)->setData(x, y);
+  
+  auto index = m_plotNames.indexOf(name);
+
+  m_CustomPlot->graph(index)->setData(x, y);
+  
   lastPointKey = x.last();
   if(rescalingON){
     m_CustomPlot->xAxis->setRange(lastPointKey, 10, Qt::AlignRight); // means there a 10 sec

@@ -11,6 +11,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 20)
 
+install (FILES qt.conf DESTINATION bin)
+
 find_package(Qt6 6.2.4 COMPONENTS Quick QuickControls2 Charts PrintSupport SerialPort REQUIRED)
 
 qt_add_resources(QML_RESOURCES resources.qrc)

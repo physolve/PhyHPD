@@ -76,4 +76,5 @@ private:
     const QString query;
     Data m_pressure;
     Data m_vacuum;
+    QString m_bufferData;
 };

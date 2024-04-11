@@ -107,7 +107,7 @@ void Controller::setLogText(const QString &text)
 }
 
 PressureController::PressureController(const SettingsDialog::Settings &settings, QObject *parent) : 
-    Controller(settings,parent), query("#010\r"), m_pressure("Pressure",{0},{0}), m_vacuum("Vacuum",{0},{0})
+    Controller(settings,parent), query("#01\r"), m_pressure("Pressure",{0},{0}), m_vacuum("Vacuum",{0},{0})
 {
 }
 // #010\r to read only first channel, #000\r to read all channels, but what is syntax? 
@@ -125,9 +125,15 @@ void PressureController::readData(){
     // responce.chop(1);
 
     QString responce = QString::fromLocal8Bit(data);
+    if(!responce.endsWith('\r')){
+        m_bufferData = responce;
+        return;
+    }
+    responce = m_bufferData + responce;
+    responce.remove(0,1);
     responce.chop(1);
-    QStringList channelsVoltage = responce.split('+');
-
+    QStringList channelsVoltage = responce.split('+', Qt::SkipEmptyParts);
+    //qDebug() << channelsVoltage;
     bool ok = true;
 
     auto voltagePressure = channelsVoltage.at(0).toDouble(&ok);

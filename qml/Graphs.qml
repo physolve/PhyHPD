@@ -31,9 +31,11 @@ Item{
                 }
                 
             }
-            Connections {
-                target: pressureBack 
-                function pointsPressureChanged(x,y) { customPlotPressure.backendData(x, y) }
+            function addNewGraph(name){
+                customPlotPressure.placeGraph(name)
+            }
+            function passValues(name, x, y){
+                customPlotPressure.backendData(name, x, y)
             }
             
             RoundButton {
@@ -78,7 +80,6 @@ Item{
             }
         }  
     }
-
     ColumnLayout{
         TabBar {
             id: barGraph
@@ -114,10 +115,29 @@ Item{
             }
             Component.onCompleted: {
                 let pressure = plotPressure.createObject()
+                pressure.addNewGraph("pressure")
+                pressure.addNewGraph("vacuum")
                 baseContainer.append(pressure)
-                // let vacuum = plotVacuum.createObject()
-                // baseContainer.append(vacuum)
+                let vacuum = plotPressure.createObject()
+                vacuum.addNewGraph("vacuum")
+                vacuum.addNewGraph("pressure")
+                baseContainer.append(vacuum)
             }
+        }
+    }
+    Connections {
+        target: pressureBack 
+        function pointsPressureChanged(x, y) {
+            // index of plot?
+            // for now only 0 
+            baseContainer.get(0).passValues("pressure", x, y)
+            //customPlotPressure.backendData(x, y) 
+        }
+        function pointsVacuumChanged(x, y) {
+            // index of plot?
+            // for now only 0 
+            baseContainer.get(0).passValues("vacuum", x, y)
+            //customPlotPressure.backendData(x, y) 
         }
     }
     function detachPressure(){
