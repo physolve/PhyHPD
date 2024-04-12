@@ -85,7 +85,6 @@ void Controller::startReading()
 void Controller::stopReading(){
     m_timer->stop();
     m_timePassed.restart();
-    //m_points.clearPoints();
 }
 
 void Controller::processEvents(){
@@ -107,7 +106,7 @@ void Controller::setLogText(const QString &text)
 }
 
 PressureController::PressureController(const SettingsDialog::Settings &settings, QObject *parent) : 
-    Controller(settings,parent), query("#01\r"), m_pressure("Pressure",{0},{0}), m_vacuum("Vacuum",{0},{0})
+    Controller(settings,parent), query("#01\r"), m_pressure("pressure",{0},{0}), m_vacuum("vacuum",{0},{0})
 {
 }
 // #010\r to read only first channel, #000\r to read all channels, but what is syntax? 
@@ -138,32 +137,30 @@ void PressureController::readData(){
 
     auto voltagePressure = channelsVoltage.at(0).toDouble(&ok);
     auto voltageVacuum = channelsVoltage.at(1).toDouble(&ok);
-
+    auto point_pr = 0.0;
     if(voltagePressure != 0 && ok){
-        auto point = filterData_pr(voltagePressure);
-        m_pressure.y.append(point);
+        point_pr = filterData_pr(voltagePressure);
     }
     else{
-        m_pressure.y.append(0);
+        point_pr = 0.0;
         if(++threshold>3){
             shuttingOff();
         }
     }
+    m_pressure.addPoint(m_timePassed.elapsed()/1000, point_pr);
 
+    auto point_vac = 0.0;
     if(voltageVacuum != 0 && ok){
-        auto point = filterData_vac(voltageVacuum);
-        m_vacuum.y.append(point);
+        point_vac = filterData_vac(voltageVacuum);
     }
     else{
-        m_vacuum.y.append(0);
+        point_vac = 0.0;
         if(++threshold>3){
             shuttingOff();
         }
     }
+    m_vacuum.addPoint(m_timePassed.elapsed()/1000, point_vac);
     
-    m_pressure.x.append(m_timePassed.elapsed()/1000);
-    m_vacuum.x.append(m_timePassed.elapsed()/1000);
-
     emit pointsPressureChanged(m_pressure.x, m_pressure.y);
     emit pointsVacuumChanged(m_vacuum.x, m_vacuum.y);
     emit lastPressureChanged(m_pressure.y.last());
@@ -176,7 +173,7 @@ const double PressureController::filterData_pr(double voltage){
 }
 
 const double PressureController::filterData_vac(double voltage){
-    double point = 1 * voltage - 0;
+    double point = 0.1303 * voltage - 0.1253;
     return point;
 }
 
@@ -185,4 +182,11 @@ QMap<QString, double> PressureController::getLastChanged(){
     points[m_pressure.name] = m_pressure.y.last(); 
     points[m_vacuum.name] = m_vacuum.y.last(); 
     return points;
+}
+
+void PressureController::stopReading(){
+    m_timer->stop();
+    m_timePassed.restart();
+    m_pressure.clearPoints();
+    m_vacuum.clearPoints();
 }

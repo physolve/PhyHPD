@@ -127,17 +127,16 @@ Item{
     }
     Connections {
         target: pressureBack 
-        function pointsPressureChanged(x, y) {
+        function onPointsPressureChanged(x, y) {
             // index of plot?
-            // for now only 0 
             baseContainer.get(0).passValues("pressure", x, y)
-            //customPlotPressure.backendData(x, y) 
+            baseContainer.get(1).passValues("pressure", x, y) 
         }
-        function pointsVacuumChanged(x, y) {
+        function onPointsVacuumChanged(x, y) {
             // index of plot?
             // for now only 0 
             baseContainer.get(0).passValues("vacuum", x, y)
-            //customPlotPressure.backendData(x, y) 
+            baseContainer.get(1).passValues("vacuum", x, y) 
         }
     }
     function detachPressure(){

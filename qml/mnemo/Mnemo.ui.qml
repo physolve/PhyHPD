@@ -10,13 +10,13 @@ Rectangle {
     color: "transparent"
     Connections {
         target: pressureBack
-        function lastPressureChanged(y) {
+        function onLastPressureChanged(y) {
             slider1.value = y
         }
     }
     Connections {
         target: pressureBack
-        function lastVacuumChanged(y) {
+        function onLastVacuumChanged(y) {
             slider2.value = y
         }
     }

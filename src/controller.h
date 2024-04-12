@@ -15,6 +15,14 @@ struct Data {
         x.clear();
         y.clear();
     }
+    void addPoint(const quint64 &val_x, const double &val_y){
+        if(x.count() > 120){
+            x.removeFirst();
+            y.removeFirst();
+        }
+        x.append(val_x);
+        y.append(val_y);        
+    }
     QString name;
     QList<quint64> x; // one second data
     QList<double> y; // one second data
@@ -41,18 +49,15 @@ private slots:
 signals:
     void mySettingsChanged();
     void logChanged(QString);
-    //void dataChanged(const QStringList& data);
-    void pointsChanged(const QList<quint64>& x, const QList<double>& y);
-    void lastChanged(double y);
 protected:
     void setLogText(const QString &text);
     QSerialPort *m_serial = nullptr;
     QElapsedTimer m_timePassed;
+    QTimer* m_timer;
     uint8_t threshold;
 private:
     virtual void writeData() ;
     SettingsDialog::Settings m_settings;
-    QTimer* m_timer;
     QString logText;
 };
 
@@ -62,6 +67,7 @@ class PressureController : public Controller
 public:
     PressureController(const SettingsDialog::Settings &settings, QObject *parent = nullptr);
     QMap<QString,double> getLastChanged();
+    void stopReading();
 signals:
     void pointsPressureChanged(const QList<quint64>& x, const QList<double>& y);
     void pointsVacuumChanged(const QList<quint64>& x, const QList<double>& y);

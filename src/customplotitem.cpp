@@ -27,84 +27,89 @@ CustomPlotItem::~CustomPlotItem() {
 }
 
 void CustomPlotItem::initCustomPlot(int index) {
-  if(!m_CustomPlot){
-    m_CustomPlot = new QCustomPlot();
+    if(!m_CustomPlot){
+        m_CustomPlot = new QCustomPlot();
 
-    connect( m_CustomPlot, &QCustomPlot::destroyed, this, [=](){ qDebug() << QString(" QCustomPlot (%1) pointer is destroyed ").arg(index); });
-    updateCustomPlotSize();
+        connect( m_CustomPlot, &QCustomPlot::destroyed, this, [=](){ qDebug() << QString(" QCustomPlot (%1) pointer is destroyed ").arg(index); });
+        updateCustomPlotSize();
 
-    m_CustomPlot->setOpenGl(true); // it's not working without some fckn include
+        m_CustomPlot->setOpenGl(true); // it's not working without some fckn include
 
-    m_CustomPlot->addGraph();
-    m_CustomPlot->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::black, 1.5), QBrush(Qt::white), 9));
-    m_CustomPlot->graph(0)->setPen(QPen(QColor(120, 120, 120), 2));
-    m_CustomPlot->graph(0)->setAdaptiveSampling(true);
-    m_CustomPlot->graph()->setName("zero");
-    m_plotNames << "zero";
+        m_CustomPlot->addGraph();
+        m_CustomPlot->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::black, 1.5), QBrush(Qt::white), 9));
+        m_CustomPlot->graph(0)->setPen(QPen(QColor(120, 120, 120), 2));
+        m_CustomPlot->graph(0)->setAdaptiveSampling(true);
+        m_CustomPlot->graph()->setName("zero");
+        m_plotNames << "zero";
 
-    QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
-    timeTicker->setTimeFormat("%h:%m:%s");
-    m_CustomPlot->xAxis->setTicker(timeTicker);
-    m_CustomPlot->yAxis->setRange(0.0, 1.0);
-    m_CustomPlot->axisRect()->setupFullAxesBox(); //?
-    m_CustomPlot->yAxis->setRange(0.0, 1.0);
+        QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
+        timeTicker->setTimeFormat("%h:%m:%s");
+        m_CustomPlot->xAxis->setTicker(timeTicker);
+        m_CustomPlot->yAxis->setRange(0.0, 1.0);
+        m_CustomPlot->axisRect()->setupFullAxesBox(); //?
+        m_CustomPlot->yAxis->setRange(0.0, 1.0);
 
-    //make left and bottom axes transfer their ranges to right and top axes:
-    connect(m_CustomPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), m_CustomPlot->xAxis2, SLOT(setRange(QCPRange))); //?
-    connect(m_CustomPlot->yAxis, SIGNAL(rangeChanged(QCPRange)), m_CustomPlot->yAxis2, SLOT(setRange(QCPRange))); //?
+        //make left and bottom axes transfer their ranges to right and top axes:
+        connect(m_CustomPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), m_CustomPlot->xAxis2, SLOT(setRange(QCPRange))); //?
+        connect(m_CustomPlot->yAxis, SIGNAL(rangeChanged(QCPRange)), m_CustomPlot->yAxis2, SLOT(setRange(QCPRange))); //?
 
 
-    m_CustomPlot->xAxis->setLabel("Время, с");
-    m_CustomPlot->xAxis->setLabelColor(Qt::white);
-    m_CustomPlot->yAxis->setLabel("Поток, норм. л./мин");
-    m_CustomPlot->yAxis->setLabelColor(Qt::white);
-    m_CustomPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
-    //startTimer(500);
+        m_CustomPlot->xAxis->setLabel("Время, с");
+        m_CustomPlot->xAxis->setLabelColor(Qt::white);
+        m_CustomPlot->yAxis->setLabel("Давление, бар");
+        m_CustomPlot->yAxis->setLabelColor(Qt::white);
+        m_CustomPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+        //startTimer(500);
 
-    connect(m_CustomPlot, &QCustomPlot::afterReplot, this,
-    &CustomPlotItem::onCustomReplot);
+        connect(m_CustomPlot, &QCustomPlot::afterReplot, this,
+        &CustomPlotItem::onCustomReplot);
 
-    qDebug() << QString("QCustomplot (%1) Initialized").arg(index);
+        qDebug() << QString("QCustomplot (%1) Initialized").arg(index);
 
-    // set some pens, brushes and backgrounds:
-    m_CustomPlot->xAxis->setBasePen(QPen(Qt::white, 1));
-    m_CustomPlot->yAxis->setBasePen(QPen(Qt::white, 1));
-    m_CustomPlot->xAxis->setTickPen(QPen(Qt::white, 1));
-    m_CustomPlot->yAxis->setTickPen(QPen(Qt::white, 1));
-    m_CustomPlot->xAxis->setSubTickPen(QPen(Qt::white, 1));
-    m_CustomPlot->yAxis->setSubTickPen(QPen(Qt::white, 1));
-    m_CustomPlot->xAxis->setTickLabelColor(Qt::white);
-    m_CustomPlot->yAxis->setTickLabelColor(Qt::white);
-    m_CustomPlot->xAxis->grid()->setPen(QPen(QColor(140, 140, 140), 1, Qt::DotLine));
-    m_CustomPlot->yAxis->grid()->setPen(QPen(QColor(140, 140, 140), 1, Qt::DotLine));
-    m_CustomPlot->xAxis->grid()->setSubGridPen(QPen(QColor(80, 80, 80), 1, Qt::DotLine));
-    m_CustomPlot->yAxis->grid()->setSubGridPen(QPen(QColor(80, 80, 80), 1, Qt::DotLine));
-    m_CustomPlot->xAxis->grid()->setSubGridVisible(true);
-    m_CustomPlot->yAxis->grid()->setSubGridVisible(true);
-    m_CustomPlot->xAxis->grid()->setZeroLinePen(Qt::NoPen);
-    m_CustomPlot->yAxis->grid()->setZeroLinePen(Qt::NoPen);
-    m_CustomPlot->xAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
-    m_CustomPlot->yAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
-    QLinearGradient plotGradient;
-    plotGradient.setStart(0, 0);
-    plotGradient.setFinalStop(0, 350);
-    plotGradient.setColorAt(0, QColor(80, 80, 80));
-    plotGradient.setColorAt(1, QColor(50, 50, 50));
-    m_CustomPlot->setBackground(plotGradient);
-    QLinearGradient axisRectGradient;
-    axisRectGradient.setStart(0, 0);
-    axisRectGradient.setFinalStop(0, 350);
-    axisRectGradient.setColorAt(0, QColor(80, 80, 80));
-    axisRectGradient.setColorAt(1, QColor(30, 30, 30));
-    m_CustomPlot->axisRect()->setBackground(axisRectGradient);
-  }
-  m_CustomPlot->replot();
+        // set some pens, brushes and backgrounds:
+        m_CustomPlot->xAxis->setBasePen(QPen(Qt::white, 1));
+        m_CustomPlot->yAxis->setBasePen(QPen(Qt::white, 1));
+        m_CustomPlot->xAxis->setTickPen(QPen(Qt::white, 1));
+        m_CustomPlot->yAxis->setTickPen(QPen(Qt::white, 1));
+        m_CustomPlot->xAxis->setSubTickPen(QPen(Qt::white, 1));
+        m_CustomPlot->yAxis->setSubTickPen(QPen(Qt::white, 1));
+        m_CustomPlot->xAxis->setTickLabelColor(Qt::white);
+        m_CustomPlot->yAxis->setTickLabelColor(Qt::white);
+        m_CustomPlot->xAxis->grid()->setPen(QPen(QColor(140, 140, 140), 1, Qt::DotLine));
+        m_CustomPlot->yAxis->grid()->setPen(QPen(QColor(140, 140, 140), 1, Qt::DotLine));
+        m_CustomPlot->xAxis->grid()->setSubGridPen(QPen(QColor(80, 80, 80), 1, Qt::DotLine));
+        m_CustomPlot->yAxis->grid()->setSubGridPen(QPen(QColor(80, 80, 80), 1, Qt::DotLine));
+        m_CustomPlot->xAxis->grid()->setSubGridVisible(true);
+        m_CustomPlot->yAxis->grid()->setSubGridVisible(true);
+        m_CustomPlot->xAxis->grid()->setZeroLinePen(Qt::NoPen);
+        m_CustomPlot->yAxis->grid()->setZeroLinePen(Qt::NoPen);
+        m_CustomPlot->xAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
+        m_CustomPlot->yAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
+        QLinearGradient plotGradient;
+        plotGradient.setStart(0, 0);
+        plotGradient.setFinalStop(0, 350);
+        plotGradient.setColorAt(0, QColor(80, 80, 80));
+        plotGradient.setColorAt(1, QColor(50, 50, 50));
+        m_CustomPlot->setBackground(plotGradient);
+        QLinearGradient axisRectGradient;
+        axisRectGradient.setStart(0, 0);
+        axisRectGradient.setFinalStop(0, 350);
+        axisRectGradient.setColorAt(0, QColor(80, 80, 80));
+        axisRectGradient.setColorAt(1, QColor(30, 30, 30));
+        m_CustomPlot->axisRect()->setBackground(axisRectGradient);
+    }
+    m_CustomPlot->replot();
 }
 
 void CustomPlotItem::placeGraph(const QString &name){
   m_CustomPlot->addGraph();
   // m_CustomPlot->graph() the Last 
-  m_CustomPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::blue, 1.5), QBrush(Qt::white), 9));
+  QPen pen;
+  if(name == "pressure")
+    pen = QPen(Qt::darkBlue, 1.5);
+  else
+    pen = QPen(Qt::darkMagenta, 1.5);
+  m_CustomPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, pen, QBrush(Qt::white), 9));
   m_CustomPlot->graph()->setPen(QPen(QColor(120, 120, 120), 2));
   m_CustomPlot->graph()->setAdaptiveSampling(true);
   m_CustomPlot->graph()->setName(name);
