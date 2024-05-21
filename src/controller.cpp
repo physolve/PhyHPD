@@ -140,6 +140,7 @@ void PressureController::readData(){
     auto point_pr = 0.0;
     if(voltagePressure != 0 && ok){
         point_pr = filterData_pr(voltagePressure);
+        threshold = 0;
     }
     else{
         point_pr = 0.0;
@@ -152,6 +153,7 @@ void PressureController::readData(){
     auto point_vac = 0.0;
     if(voltageVacuum != 0 && ok){
         point_vac = filterData_vac(voltageVacuum);
+        threshold = 0;
     }
     else{
         point_vac = 0.0;
