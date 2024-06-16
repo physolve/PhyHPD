@@ -5,9 +5,9 @@
 
 #include "settingsdialog.h"
 #include "controller.h"
-#include "demodata.h"
 #include "writelogfile.h"
 #include "exptable.h"
+#include "mnemostate.h"
 
 class MainWindow : public QApplication
 {
@@ -23,6 +23,7 @@ public:
     Q_INVOKABLE void onReadButtonClicked(bool s);
     Q_INVOKABLE void openSerialPort();
     Q_INVOKABLE void closeSerialPort();
+
 signals:
     void logChanged(QString);
 
@@ -34,9 +35,7 @@ private:
 
     SettingsDialog *m_settings = nullptr;
 
-    PressureController *m_pressure;
-
-    DemoData *m_demoPressure;
+    PressureController* m_pressure = nullptr;
 
     WriteLogFile m_writeLog;
     QTimer *m_logTimer;
@@ -45,5 +44,6 @@ private:
     QString logText;
 
     ExpTable m_expTable;
+    MnemoState m_mnemoState;
     QQmlApplicationEngine m_engine;
 };

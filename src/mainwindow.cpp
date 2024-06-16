@@ -6,7 +6,7 @@
 #include <QtQuickControls2/QQuickStyle>
 
 MainWindow::MainWindow(int &argc, char **argv)
-    : QApplication(argc, argv), m_settings(new SettingsDialog), m_writeLog(), m_logTimer(new QTimer)
+    : QApplication(argc, argv), m_settings(new SettingsDialog), m_writeLog(), m_logTimer(new QTimer), m_expTable(), m_mnemoState()
 {
     QQuickStyle::setStyle("Material");
     QString applicationName = "MHgrph";
@@ -25,6 +25,7 @@ MainWindow::MainWindow(int &argc, char **argv)
     m_engine.rootContext()->setContextProperty("backend", this);
     m_engine.rootContext()->setContextProperty("settingsDialog", m_settings);
     m_engine.rootContext()->setContextProperty("table_model", &m_expTable);
+    m_engine.rootContext()->setContextProperty("mnemostate", &m_mnemoState);
     
     initController();
     
@@ -48,24 +49,10 @@ void MainWindow::initController(){
         connect(m_pressure, &Controller::logChanged, this, &MainWindow::logChanged);
         m_engine.rootContext()->setContextProperty("pressureBack", m_pressure);
     }
-    else{
-        setLogText("Pressure is not connected\n Switching to Demo");
-        m_demoPressure = new DemoData;
-        connect(m_demoPressure, &DemoData::logChanged, this, &MainWindow::logChanged);
-        m_engine.rootContext()->setContextProperty("pressureBack", m_demoPressure);
-    }
 }
 
 void MainWindow::onReadButtonClicked(bool s){
     if(!m_settings->isPressureConnected()){
-        if(s){
-            m_demoPressure->startDemo();
-            m_logTimer->start(1000);
-        }
-        else{
-            m_demoPressure->stopDemo();
-            m_logTimer->stop();
-        }
         return;
     }
     if(s){
@@ -96,13 +83,12 @@ void MainWindow::processEvents(){
     double c_pressure = 0;
     double c_vacuum = 0;
     if(!m_settings->isPressureConnected()){
-        c_vacuum = c_pressure = m_demoPressure->getLastChanged();
+        return;
     }
-    else{
-        auto c_map = m_pressure->getLastChanged();
-        c_pressure = c_map["pressure"];
-        c_vacuum = c_map["vacuum"];
-    }
+    
+    auto c_map = m_pressure->getLastChanged();
+    c_pressure = c_map["pressure"];
+    c_vacuum = c_map["vacuum"];
     
     QString line = QString("%1\t%2\t%3").arg(c_time).arg(c_pressure).arg(c_vacuum);
     m_writeLog.writeLine(line);

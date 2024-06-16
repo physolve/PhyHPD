@@ -8,8 +8,8 @@
 class SettingsDialog;
 
 struct Data {
-    Data() {}
-    Data( const QString& name, QList<quint64> x, QList<double> y)
+    Data(const QString& name) : name(name) {}
+    Data(const QString& name, QList<quint64> x, QList<double> y)
         : name(name), x(x), y(y) {}
     void clearPoints(){
         x.clear();
@@ -47,7 +47,7 @@ private slots:
     void processEvents();
 
 signals:
-    void mySettingsChanged();
+    //void mySettingsChanged();
     void logChanged(QString);
 protected:
     void setLogText(const QString &text);
@@ -64,15 +64,17 @@ private:
 class PressureController : public Controller
 {
     Q_OBJECT
+
 public:
     PressureController(const SettingsDialog::Settings &settings, QObject *parent = nullptr);
     QMap<QString,double> getLastChanged();
     void stopReading();
-signals:
-    void pointsPressureChanged(const QList<quint64>& x, const QList<double>& y);
-    void pointsVacuumChanged(const QList<quint64>& x, const QList<double>& y);
-    void lastPressureChanged(double y);
-    void lastVacuumChanged(double y);
+    Q_INVOKABLE QSharedPointer<Data> getData(const QString &name);
+// signals:
+//     void pointsPressureChanged(const QList<quint64>& x, const QList<double>& y);
+//     void pointsVacuumChanged(const QList<quint64>& x, const QList<double>& y);
+//     void lastPressureChanged(double y);
+//     void lastVacuumChanged(double y);
 private slots:
     void readData() override;
 private:
@@ -80,7 +82,8 @@ private:
     const double filterData_pr(double voltage);
     const double filterData_vac(double voltage);
     const QString query;
-    Data m_pressure;
-    Data m_vacuum;
+    //Data m_pressure;
+    //Data m_vacuum;
     QString m_bufferData;
+    QMap<QString, QSharedPointer<Data>> dataMap;
 };

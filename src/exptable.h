@@ -7,6 +7,8 @@ struct ExpData {
     void clearPoints(){
         time.clear();
         flux.clear();
+        time << 0; 
+        flux << 0; 
     }
     QString name;
     QList<quint64> time; // one second data

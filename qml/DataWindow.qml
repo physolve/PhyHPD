@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Qt.labs.platform 1.1
+
 Item{
     width: parent.width
     height: parent.height
@@ -17,22 +19,36 @@ Item{
                 connectBtn.checked ? backend.openSerialPort() : backend.closeSerialPort()
             }
         }
-        ListView {
-            Layout.fillWidth: true
-            model: backend.data
-            implicitHeight: 240
-            delegate: Rectangle{
-                color: "lightgray"
-                height: 24
-                Text {
-                    text: modelData
-                    color: "white"
-                    font.pointSize: 14
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-            }
+        Button{
+            id: testPressValve
+            width: 120
+            text : "Test to press valve"
+            font.pointSize: 10
+            onClicked: askToPress.open()
         }
+        MessageDialog{
+            id: askToPress
+            buttons: MessageDialog.Ok
+            modality: Qt.NonModal
+            text: "Press Vacuum valve"
+            onAccepted: if(!mnemostate.getValveState("vacuum")) askToPress.open()// check the state of valve
+        }
+        // ListView {
+        //     Layout.fillWidth: true
+        //     model: backend.data //backend? it somehow worked with backend
+        //     implicitHeight: 240
+        //     delegate: Rectangle{
+        //         color: "lightgray"
+        //         height: 24
+        //         Text {
+        //             text: modelData
+        //             color: "white"
+        //             font.pointSize: 14
+        //             horizontalAlignment: Text.AlignHCenter
+        //             verticalAlignment: Text.AlignVCenter
+        //         }
+        //     }
+        // }
         Button{
                 id: configurePressureBtn
                 text: qsTr("Configure pressure")
@@ -56,7 +72,7 @@ Item{
                 radius: 20
                 color: "yellow"
             }
-        }        
+        }      
     }
     Item{    
         SettingsDialog{

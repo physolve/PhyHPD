@@ -20,6 +20,12 @@ Rectangle {
             slider2.value = y
         }
     }
+
+    //set-Pres-Values
+
+    function sendValveToBack(name, checked){
+        mnemostate.setValveState(name, checked)
+    }
     //color: Constants.backgroundColor
     Material.theme: Material.Dark
     Material.accent: Material.Indigo
@@ -29,7 +35,7 @@ Rectangle {
         y: 0
         width: 1080
         height: 760
-        source: "qrc:/MHgrph/qml/images/scheme.jpg"
+        source: "qrc:/MHgrph/qml/images/scheme_1.jpg"
         fillMode: Image.PreserveAspectFit
     }
     RoundButton {
@@ -51,6 +57,8 @@ Rectangle {
             border.color: valve1.checked ? "#bac6cc" : "#4b90e4"
             border.width: 2
         }
+        property string name: "vacuum"
+        onToggled: sendValveToBack(name, checked)
     }
     RoundButton {
         id: valve2
@@ -71,6 +79,8 @@ Rectangle {
             border.color: valve2.checked ? "#bac6cc" : "#4b90e4"
             border.width: 2
         }
+        property string name: "bypass"
+        onToggled: sendValveToBack(name, checked)
     }
     RoundButton {
         id: valve3
@@ -91,6 +101,8 @@ Rectangle {
             border.color: valve3.checked ? "#bac6cc" : "#4b90e4"
             border.width: 2
         }
+        property string name: "supply"
+        onToggled: sendValveToBack(name, checked)
     }
     RoundButton {
         id: valve4
@@ -111,6 +123,8 @@ Rectangle {
             border.color: valve4.checked ? "#bac6cc" : "#4b90e4"
             border.width: 2
         }
+        property string name: "chamber"
+        onToggled: sendValveToBack(name, checked)
     }
 
     Rectangle {

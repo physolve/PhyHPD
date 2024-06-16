@@ -8,5 +8,6 @@
         <file>qml/mnemo/Mnemo.ui.qml</file>
         <file>qml/mnemo/CircularSlider.qml</file>
         <file>qml/images/scheme.jpg</file>
+        <file>qml/images/scheme_1.jpg</file>
     </qresource>
 </RCC>
