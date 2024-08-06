@@ -2,15 +2,17 @@
 #include "exptable.h"
 
 ExpTable::ExpTable(QObject *parent)
-    : QAbstractTableModel(parent), m_exp("Exp",{0},{0},{0})
+    : QAbstractTableModel(parent), currentDataCount(0)
 {
     header << "Time" << "Flux" << "Permeation";
-    for(int n = 0; n < rowCount(); ++n){
-        m_exp.time.append(n+1);
-        m_exp.flux.append(std::erf(n*4.0/rowCount()-2)+1);
-        m_exp.permeation.append(m_exp.flux.last()/10);
-    }
-
+    m_expData["time"] = QSharedPointer<ExpData>::create("time", 0); // 0 - dataset id
+    m_expData["flux"] = QSharedPointer<ExpData>::create("flux", 0); // 0 - dataset id
+    m_expData["permeation"] = QSharedPointer<ExpData>::create("permeation", 0); // 0 - dataset id
+    // for(int n = 0; n < rowCount(); ++n){
+    //     m_exp.time.append(n+1);
+    //     m_exp.flux.append(std::erf(n*4.0/rowCount()-2)+1);
+    //     m_exp.permeation.append(m_exp.flux.last()/10);
+    // }
 }
 
 QVariant ExpTable::headerData(int section, Qt::Orientation orientation, int role) const
@@ -24,18 +26,23 @@ QVariant ExpTable::headerData(int section, Qt::Orientation orientation, int role
     return QVariant();
 }
 
+QSharedPointer<ExpData> ExpTable::getExpData(const QString &name){
+    return m_expData[name];
+}
+
 int ExpTable::rowCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
         return 0;
-    return 10;
+    return currentDataCount;
 }
 
 int ExpTable::columnCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
         return 0;
-    return 3;
+    
+    return 3;//static_cast<int>(currentDataSet.count()+1);
 }
 
 QVariant ExpTable::data(const QModelIndex &index, int role) const
@@ -46,17 +53,59 @@ QVariant ExpTable::data(const QModelIndex &index, int role) const
             && index.row() >= 0 && index.row() < rowCount()
             && index.column() >= 0 && index.column() < columnCount()){
         switch(index.column()){
-            case 0:
-                return m_exp.time.at(index.row());
-            case 1:
-                return QString("%1").arg(m_exp.flux.at(index.row()), 0, 'f', 3);
-            case 2:
-                return QString::number(m_exp.permeation.at(index.row()), 'e', 3);
+            case TimeColumn:
+                return m_expData["time"]->getValue().at(index.row());
+            case FluxColumn:
+                return QString("%1").arg(m_expData["flux"]->getValue().at(index.row()), 0, 'f', 3);
+            case PermeationColumn:
+                return QString("%1").arg(m_expData["permeation"]->getValue().at(index.row()), 0, 'f', 3);
             default: break;
         }
+        // THOSE ROLES FOR WHAT?
+        //  Time,
+        // Value,
+        // CurTime,
+        // CurValue,
     }
         //return QString("data %1-%2").arg(index.row()).arg(index.column());
     return QVariant();
+}
+
+QHash<int, QByteArray> ExpTable::roleNames() const
+{
+    static QHash<int, QByteArray> mapping {
+        {NameRole, "name"},
+        {Time, "x"},
+        {Value, "y"},
+        {CurTime, "ct"},
+        {CurValue, "cv"}
+    };
+    return mapping;
+}
+
+void ExpTable::appendData(const QVector<qreal> &timeList){
+    if(timeList.isEmpty())
+        return;
+    const auto &firstValue = timeList.first();
+    QVector<qreal> corrTimeList;
+    for(const auto &val : timeList){
+        corrTimeList << val-firstValue;
+    }
+    m_expData["time"]->setData(corrTimeList, timeList);
+}
+//change to set data
+void ExpTable::appendData(const QVector<double> &dataList, const QString &dataName){ // not tested
+    if(dataList.isEmpty())
+        return;
+    // m_expData: currentDataSet: "ZeroFlux", "ZeroPermeation"
+    const auto &timeList = m_expData["time"]->getTime();
+    m_expData[dataName]->setData(timeList, dataList);
+
+    const QModelIndex startIndex = index(0, 0);
+    const QModelIndex endIndex   = index(m_expData.count() - 1, 0);
+    // current data count
+    // ...but only the population field
+    emit dataChanged(startIndex, endIndex, QVector<int>() << Time << Value << CurTime << CurValue );
 }
 
 QString ExpTable::getResultStr() const

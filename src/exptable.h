@@ -1,36 +1,42 @@
 #pragma once
 #include <QAbstractTableModel>
-struct ExpData {
-    ExpData() {}
-    ExpData( const QString& name, QList<quint64> time, QList<double> flux, QList<double> permeation)
-        : name(name), time(time), flux(flux), permeation(permeation) {}
-    void clearPoints(){
-        time.clear();
-        flux.clear();
-        time << 0; 
-        flux << 0; 
-    }
-    QString name;
-    QList<quint64> time; // one second data
-    QList<double> flux; // one second data
-    QList<double> permeation;
-};
+#include <QElapsedTimer>
+#include "datacollection.h"
 class ExpTable : public QAbstractTableModel
 {
     Q_OBJECT
     Q_PROPERTY(QString resultStr READ getResultStr NOTIFY resultChanged)
 public:
+    enum Column {
+        TimeColumn,
+        FluxColumn,
+        PermeationColumn
+    };
+    enum TableRole {
+        NameRole = Qt::UserRole,
+        Time,
+        Value,
+        CurTime,
+        CurValue,
+    };
     explicit ExpTable(QObject *parent = nullptr);
     Q_INVOKABLE QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-    
+    Q_INVOKABLE QSharedPointer<ExpData> getExpData(const QString &name);
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    
+    QHash<int, QByteArray> roleNames() const override;
+    
     QString getResultStr() const;
+
+    void appendData(const QVector<qreal> &timeList);
+    void appendData(const QVector<double> &dataList, const QString &dataName);
 signals:
     void resultChanged(QString);
 private:
     QString resultStr;
     QStringList header;
-    ExpData m_exp;
+    unsigned int currentDataCount;
+    QMap<QString, QSharedPointer<ExpData>> m_expData;
 };

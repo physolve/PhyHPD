@@ -2,28 +2,30 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import CustomPlot
-// Do I have to place Component in item?
 Item{
-    //id: graphItem
-    ObjectModel
-    {
-        id: baseContainer
-    }
+    anchors.fill: parent
     Component{
         id: plotPressure
         Item {
-            //id: itemPlotPressure
-            width: 600
-            height: 400
+            required property string plotName 
+            required property var sensorsList
+            required property int m_index
+            property bool isDetachable: true
+            required property string label
+            //anchors.left: parent.left; 
+            implicitWidth: 450
+            implicitHeight: 350
             CustomPlotItem {
                 id: customPlotPressure
-                width: parent.width;  height: parent.height-50 // resize
-                //width: 600
-                //height: 400
-                anchors.left: parent.left; anchors.top: parent.top
-                Layout.columnSpan: 3
-                Layout.rowSpan: 1
-                Component.onCompleted: initCustomPlot(0)
+                anchors.left: parent.left; anchors.right: parent.right; anchors.top: parent.top
+                width: parent.width;  height: parent.height-50
+                Component.onCompleted: {
+                    initCustomPlot(0)
+                    for(const sensorName of sensorsList){
+                        placePointerGraph(sensorName, dataModel.getSensor(sensorName))
+                    }
+                    setCustomLabel(label)
+                }
                 Component.onDestruction: testJSString(0)
                 function testJSString(num) {
                     let text = "I have been destroyed_ %1"
@@ -31,13 +33,12 @@ Item{
                 }
                 
             }
-            function addNewGraph(name){
-                customPlotPressure.placeGraph(name)
+            Connections {
+                target: dataModel
+                function onDataChanged() { 
+                    customPlotPressure.updatePlot()
+                }
             }
-            function passValues(name, x, y){
-                customPlotPressure.backendData(name, x, y)
-            }
-            
             RoundButton {
                 id: resetPosBtn
                 width: 40
@@ -73,110 +74,174 @@ Item{
                 font.hintingPreference: Font.PreferNoHinting
                 //Material.background:Material.Red
                 //Material.roundedScale: Material.FullScale
-                onClicked: detachPressure()
+                //onClicked: detachPressure(m_index)
             }
-            function testFunction(b){
-                detachBtn.visible = b   
-            }
+            // function testFunction(b){
+            //     detachBtn.visible = b   
+            // }
         }  
     }
-    ColumnLayout{
-        TabBar {
-            id: barGraph
-            width: parent.width
-            Repeater{
-                id: barGraphRepeater
-                model: ["Pressure", "Vacuum"]
-                TabButton{
-                    text: modelData
-                    width: Math.max(100, barGraph.width/5)
+
+    Component {
+        id: tabButtonComponent
+
+        TabButton {
+            property color frameColor: "#999"
+            property color fillColor: "#eee"
+            property color nonSelectedColor: "#ddd"
+            property string tabTitle: "New Tab"
+
+            id: tabButton
+            contentItem: Rectangle {
+                id: tabRectangle
+                color: tabButton.down ? fillColor : nonSelectedColor
+                border.width: 1
+                border.color: frameColor
+                implicitWidth: Math.max(text.width + 30, 80)
+                implicitHeight: Math.max(text.height + 10, 20)
+                Rectangle { height: 1 ; width: parent.width ; color: frameColor}
+                Rectangle { height: parent.height ; width: 1; color: frameColor}
+                Rectangle { x: parent.width - 2; height: parent.height ; width: 1; color: frameColor}
+                Text {
+                    id: text
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.leftMargin: 6
+                    text: tabButton.tabTitle
+                    elide: Text.ElideRight
+                    color: tabButton.down ? "black" : frameColor
+                    width: parent.width - button.background.width
                 }
-            }
-        }
-        StackLayout {
-            id: layoutGraph
-            width: 600
-            height: 400
-            currentIndex: barGraph.currentIndex
-            Repeater {
-                model: baseContainer
-                onItemAdded: {
-                    //index
-                    //item
-                    console.log("item added")
-                    //barRepeater.model.push(index)
-                }
-                onItemRemoved: {
-                    //index
-                    //item
-                    console.log("item removed")
-                    //barRepeater.model.splice(index)
-                }
-            }
-            Component.onCompleted: {
-                let pressure = plotPressure.createObject()
-                pressure.addNewGraph("pressure")
-                pressure.addNewGraph("vacuum")
-                baseContainer.append(pressure)
-                let vacuum = plotPressure.createObject()
-                vacuum.addNewGraph("vacuum")
-                vacuum.addNewGraph("pressure")
-                baseContainer.append(vacuum)
-            }
-        }
-    }
-    Connections {
-        target: pressureBack 
-        function onPointsPressureChanged(x, y) {
-            // index of plot?
-            baseContainer.get(0).passValues("pressure", x, y)
-            baseContainer.get(1).passValues("pressure", x, y) 
-        }
-        function onPointsVacuumChanged(x, y) {
-            // index of plot?
-            // for now only 0 
-            baseContainer.get(0).passValues("vacuum", x, y)
-            baseContainer.get(1).passValues("vacuum", x, y) 
-        }
-    }
-    function detachPressure(){
-        let window = plotComponent.createObject()
-        //window.color = Material.color(Material.Red)
-        //baseContainer.remove(0)
-        window.changeStack(baseContainer.get(0))
-        window.show()
-    }
-    function returnStack(object){
-        object.testFunction(true)
-        baseContainer.append(object)
-    }
-    Component{
-        id: plotComponent
-        Window{
-            id: plotWindow
-            width: 600
-            height: 450
-            function changeStack(object){
-                object.testFunction(false)
-                container.append(object)
-            }
-            Pane {
-                anchors.fill: parent
-                Material.theme: Material.Dark
-                StackLayout {
-                    id: layout
-                    anchors.fill: parent
-                    Repeater {
-                        model: ObjectModel
-                        {
-                            id: container
-                        }
+                Button {
+                    id: button
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.rightMargin: 4
+                    height: 12
+                    background: Rectangle {
+                        implicitWidth: 12
+                        implicitHeight: 12
+                        color: button.hovered ? "#ccc" : tabRectangle.color
+                        Text {text: "x"; anchors.centerIn: parent; color: "gray"}
                     }
+                    onClicked: tabButton.closeTab()
                 }
             }
-            onClosing: {
-                returnStack(container.get(0))
+
+            onClicked: addressBar.text = tabLayout.itemAt(TabBar.index).url;
+            function closeTab() {
+                tabBar.removeView(TabBar.index);
             }
         }
     }
+
+    Component{
+        id: chartExpData
+        ChartExpData{
+
+        }
+    }
+
+    TabBar{
+        id: tabBar
+        anchors.top: parent.top
+        width: parent.width
+        // anchors.left: parent.left
+        // anchors.right: parent.right
+        Repeater{
+            id: barGraphRepeater
+            model: ["Pressure", "Vacuum", "Diffusivity"]
+            TabButton{
+                text: modelData
+                width: Math.max(100, tabBar.width/5)
+            }
+        }
+        Component.onCompleted: createTab() /*!!!*/
+        function createTab() {
+            plotPressure.createObject(tabLayout,{plotName: "Pressure", sensorsList: ["pressure"], m_index: 0, label: "Давление, бар"})
+            plotPressure.createObject(tabLayout,{plotName: "Vacuum", sensorsList: ["vacuum"], m_index: 0, label: "Давление, бар"})
+            // var newTabButton = tabButtonComponent.createObject(tabBar, {tabTitle: "Pressure"});
+            // tabBar.addItem(newTabButton);
+            // tabBar.setCurrentIndex(tabBar.count - 1);
+            // return webview;
+            chartExpData.createObject(tabLayout,{plotName: "Diffusivity", sensorsList: ["flux","permeation"], m_index: 0, label: "Диффузия"})
+        }
+        function removeView(index) {
+            tabBar.removeItem(index);
+            if (tabBar.count > 1) {
+                tabBar.removeItem(tabBar.itemAt(index)); /*!!!*/
+                tabLayout.children[index].destroy(); /*!!!*/
+            } else {
+                browserWindow.close(); /*!!!*/
+            }
+        }
+        
+    }
+
+    StackLayout{
+        id: tabLayout
+        currentIndex: tabBar.currentIndex
+        anchors.top: tabBar.bottom
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.topMargin: 20
+        anchors.bottomMargin: 80
+    }
+
+
+    // TabBar {
+    //     id: barGraph
+    //     width: parent.width
+    //     Repeater{
+    //         id: barGraphRepeater
+    //         model: ["Pressure", "Vacuum"]
+    //         TabButton{
+    //             text: modelData
+    //             width: Math.max(100, barGraph.width/5)
+    //         }
+    //     }
+    // }
+    
+    // function detachPressure(){
+    //     let window = plotComponent.createObject()
+    //     //window.color = Material.color(Material.Red)
+    //     //baseContainer.remove(0)
+    //     window.changeStack(baseContainer.get(0))
+    //     window.show()
+    // }
+    // function returnStack(object){
+    //     object.testFunction(true)
+    //     baseContainer.append(object)
+    // }
+
+    // Component{
+    //     id: plotComponent
+    //     Window{
+    //         id: plotWindow
+    //         width: 600
+    //         height: 450
+    //         function changeStack(object){
+    //             object.testFunction(false)
+    //             container.append(object)
+    //         }
+    //         Pane {
+    //             anchors.fill: parent
+    //             Material.theme: Material.Dark
+    //             StackLayout {
+    //                 id: layout
+    //                 anchors.fill: parent
+    //                 Repeater {
+    //                     model: ObjectModel
+    //                     {
+    //                         id: container
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         onClosing: {
+    //             returnStack(container.get(0))
+    //         }
+    //     }
+    // }
 }

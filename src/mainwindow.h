@@ -6,8 +6,13 @@
 #include "settingsdialog.h"
 #include "controller.h"
 #include "writelogfile.h"
+#include "datamodel.h"
+
+#include "expcalc.h"
 #include "exptable.h"
+
 #include "mnemostate.h"
+
 
 class MainWindow : public QApplication
 {
@@ -18,11 +23,14 @@ public:
     ~MainWindow();
     //void setLogText(const QString &text);
     void initController();
+    void initDataSet();
     QString getLogText() const;
 
     Q_INVOKABLE void onReadButtonClicked(bool s);
     Q_INVOKABLE void openSerialPort();
     Q_INVOKABLE void closeSerialPort();
+
+    Q_INVOKABLE void preapreExpCalc();
 
 signals:
     void logChanged(QString);
@@ -32,7 +40,8 @@ private slots:
     void processEvents();
 
 private:
-
+    void setPointsFromFile();
+    
     SettingsDialog *m_settings = nullptr;
 
     PressureController* m_pressure = nullptr;
@@ -42,8 +51,14 @@ private:
     
     QElapsedTimer m_programmTime;
     QString logText;
+    DataModel m_dataModel;
 
-    ExpTable m_expTable;
+    ExpCalc expCalc;
+    
+    QString currentDataSet;
+    QMap<QString, ExpTable*> m_expDataSet;
+
+    
     MnemoState m_mnemoState;
     QQmlApplicationEngine m_engine;
 };

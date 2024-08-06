@@ -23,17 +23,18 @@ file(GLOB HPP_SOURCES src/*.h)
 file(GLOB CPP_LIBS lib/*.cpp)
 file(GLOB HPP_LIBS lib/*.h)
 
+add_definitions(-DQCUSTOMPLOT_USE_OPENGL )
 
 qt_add_executable(${EXECUTABLE_NAME}
     ${CPP_SOURCES} ${HPP_SOURCES}
     ${CPP_LIBS} ${HPP_LIBS}
     ${QML_RESOURCES}
 )
-
 target_link_libraries(${EXECUTABLE_NAME}
     PRIVATE Qt6::Quick
             Qt6::QuickControls2
             Qt6::Charts
             Qt6::PrintSupport
             Qt6::SerialPort
+            opengl32
 )

@@ -4,6 +4,7 @@
         <file>qml/DataWindow.qml</file>
         <file>qml/SettingsDialog.qml</file>
         <file>qml/Graphs.qml</file>
+        <file>qml/ChartExpData.qml</file>
         <file>qml/Experimental.qml</file>
         <file>qml/mnemo/Mnemo.ui.qml</file>
         <file>qml/mnemo/CircularSlider.qml</file>

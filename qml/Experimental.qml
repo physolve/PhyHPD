@@ -186,10 +186,11 @@ GroupBox {
             //Layout.fillHeight: false;
             Row{
                 spacing: 10
-                Button{
-                    width: 120
-                    text: "Calculate"
-                    font.pointSize: 10
+                Label{
+                    width: 100
+                    text: "Averaging"
+                    font.pointSize: 12
+                    anchors.verticalCenter: parent.verticalCenter
                 }
                 TextField{
                     id: curSeconds
@@ -205,50 +206,65 @@ GroupBox {
                     to: 100
                     stepSize: 10
                     snapMode: Slider.SnapOnRelease
-                    background: Rectangle {
-                        x: avgSlider.leftPadding
-                        y: avgSlider.topPadding + avgSlider.availableHeight / 2 - height / 2
-                        implicitWidth: 200
-                        implicitHeight: 4
-                        width: avgSlider.availableWidth
-                        height: implicitHeight
-                        radius: 2
-                        color: "#bdbebf"
-                        Repeater {
-                            model: (parent.to - parent.from) / parent.stepSize + 1
-                            delegate: Column {
-                                x: index * parent.width / (parent.to - parent.from) * parent.stepSize - width / 2
-                                y: 0
-                                spacing: 2
-                                Rectangle {
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                    width: 1
-                                    height: 10
-                                    color: "grey"
-                                }
-                                Text {
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                    text: index * parent.stepSize + parent.from
-                                }
-                            }
-                        }
-                        Rectangle {
-                            width: avgSlider.visualPosition * parent.width
-                            height: parent.height
-                            color: "#21be2b"
-                            radius: 2
-                        }
-                    }
 
-                    handle: Rectangle {
-                        x: avgSlider.leftPadding + avgSlider.visualPosition * (avgSlider.availableWidth - width)
-                        y: avgSlider.topPadding + avgSlider.availableHeight / 2 - height / 2
-                        implicitWidth: 26
-                        implicitHeight: 26
-                        radius: 13
-                        color: avgSlider.pressed ? "#f0f0f0" : "#f6f6f6"
-                        border.color: "#bdbebf"
-                    }
+                    // background: Rectangle {
+                    //     x: avgSlider.leftPadding
+                    //     y: avgSlider.topPadding + avgSlider.availableHeight / 2 - height / 2
+                    //     implicitWidth: 200
+                    //     implicitHeight: 4
+                    //     width: avgSlider.availableWidth
+                    //     height: implicitHeight
+                    //     radius: 2
+                    //     color: "#bdbebf"
+                    //     Repeater {
+                    //         model: (parent.to - parent.from) / parent.stepSize + 1
+                    //         delegate: Column {
+                    //             x: index * parent.width / (parent.to - parent.from) * parent.stepSize - width / 2
+                    //             y: 0
+                    //             spacing: 2
+                    //             Rectangle {
+                    //                 anchors.horizontalCenter: parent.horizontalCenter
+                    //                 width: 1
+                    //                 height: 10
+                    //                 color: "grey"
+                    //             }
+                    //             Text {
+                    //                 anchors.horizontalCenter: parent.horizontalCenter
+                    //                 text: index * parent.stepSize + parent.from
+                    //             }
+                    //         }
+                    //     }
+                    //     Rectangle {
+                    //         width: avgSlider.visualPosition * parent.width
+                    //         height: parent.height
+                    //         color: "#21be2b"
+                    //         radius: 2
+                    //     }
+                    // }
+
+                    // handle: Rectangle {
+                    //     x: avgSlider.leftPadding + avgSlider.visualPosition * (avgSlider.availableWidth - width)
+                    //     y: avgSlider.topPadding + avgSlider.availableHeight / 2 - height / 2
+                    //     implicitWidth: 6
+                    //     implicitHeight: 26
+                    //     // radius: 13
+                    //     color: avgSlider.pressed ? "#f0f0f0" : "#f6f6f6"
+                    //     border.color: "#bdbebf"
+                    // }
+                }
+            }
+            Row{
+                spacing: 10
+                Button{
+                    width: 120
+                    text: "Calculate"
+                    font.pointSize: 10
+                }
+                Button{
+                    width: 150
+                    text: "Test set constants"
+                    font.pointSize: 10
+                    onClicked: backend.preapreExpCalc()
                 }
             }
             TextArea {

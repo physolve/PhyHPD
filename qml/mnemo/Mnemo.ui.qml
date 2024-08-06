@@ -8,19 +8,21 @@ Rectangle {
     width: 1080
     height: 760
     color: "transparent"
-    Connections {
-        target: pressureBack
-        function onLastPressureChanged(y) {
-            slider1.value = y
-        }
-    }
-    Connections {
-        target: pressureBack
-        function onLastVacuumChanged(y) {
-            slider2.value = y
-        }
-    }
 
+    function setPresValues(presValues) {
+        slider1.value = presValues.pressure
+        slider2.value = presValues.vacuum
+    }
+    Connections {
+        target: dataModel
+        function onDataChanged(topLeft, bottomRight, roles) {
+            let valuesArray = {}
+            for(let i = 0; i < bottomRight.row; i++){
+                valuesArray[_myModel.data(_myModel.index(i,0),256)] = _myModel.data(_myModel.index(i,0),260) // shit models
+            }
+            setPresValues(valuesArray) // there all (fuck)
+        }
+    }
     //set-Pres-Values
 
     function sendValveToBack(name, checked){
@@ -161,7 +163,7 @@ Rectangle {
             startAngle: 40
             //Layout.fillWidth: false
             trackWidth: 10
-            value: 10
+            value: 5
             maxValue: 10
             endAngle: 320
 
@@ -213,15 +215,15 @@ Rectangle {
             startAngle: 40
             //Layout.fillWidth: false
             trackWidth: 10
-            value: 10
-            maxValue: 1100
+            value: 1.5
+            maxValue: 2
             endAngle: 320
 
             Label {
                 width: 40
                 height: 20
                 color: "black"
-                text: slider2.value.toFixed(2) // changing to exp function
+                text: slider2.value.toFixed(3) // changing to exp function
                 anchors.verticalCenter: parent.verticalCenter
                 horizontalAlignment: Text.AlignHCenter
                 anchors.horizontalCenter: parent.horizontalCenter

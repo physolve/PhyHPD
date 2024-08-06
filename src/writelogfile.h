@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QObject>
 #include <QFileDialog>
 #include <QDir>
 class WriteLogFile : public QObject

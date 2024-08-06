@@ -80,11 +80,9 @@ void Controller::startReading()
 {
     threshold = 0;
     m_timer->start(1000);
-    m_timePassed.start();
 }
 void Controller::stopReading(){
     m_timer->stop();
-    m_timePassed.restart();
 }
 
 void Controller::processEvents(){
@@ -102,11 +100,8 @@ void Controller::setLogText(const QString &text)
 }
 
 PressureController::PressureController(const SettingsDialog::Settings &settings, QObject *parent) : 
-    Controller(settings,parent), query("#01\r")
+    Controller(settings,parent), query("#01\r"), currentPressure(0), currentVacuum(0)
 {
-    dataMap["pressure"] = QSharedPointer<Data>::create("pressure");
-    dataMap["vacuum"] = QSharedPointer<Data>::create("vacuum");
-
 }
 // #010\r to read only first channel, #000\r to read all channels, but what is syntax? 
 void PressureController::writeData(){
@@ -133,7 +128,6 @@ void PressureController::readData(){
     QStringList channelsVoltage = responce.split('+', Qt::SkipEmptyParts);
     //qDebug() << channelsVoltage;
     bool ok = true;
-
     auto voltagePressure = channelsVoltage.at(0).toDouble(&ok);
     auto voltageVacuum = channelsVoltage.at(1).toDouble(&ok);
     auto point_pr = 0.0;
@@ -147,10 +141,7 @@ void PressureController::readData(){
             shuttingOff();
         }
     }
-
-    dataMap["pressure"]->addPoint(m_timePassed.elapsed()/1000, point_pr);
-    // m_pressure.addPoint(m_timePassed.elapsed()/1000, point_pr);
-
+    currentPressure = point_pr;
     auto point_vac = 0.0;
     if(voltageVacuum != 0 && ok){
         point_vac = filterData_vac(voltageVacuum);
@@ -162,13 +153,7 @@ void PressureController::readData(){
             shuttingOff();
         }
     }
-    dataMap["vacuum"]->addPoint(m_timePassed.elapsed()/1000, point_vac);
-    // m_vacuum.addPoint(m_timePassed.elapsed()/1000, point_vac);
-    
-    // emit pointsPressureChanged(m_pressure.x, m_pressure.y);
-    // emit pointsVacuumChanged(m_vacuum.x, m_vacuum.y);
-    // emit lastPressureChanged(m_pressure.y.last());
-    // emit lastVacuumChanged(m_vacuum.y.last());
+    currentVacuum = point_vac;
 }
 
 const double PressureController::filterData_pr(double voltage){
@@ -181,22 +166,15 @@ const double PressureController::filterData_vac(double voltage){
     return point;
 }
 
-QSharedPointer<Data> PressureController::getData(const QString &name){
-    return dataMap[name];
-}
-
 QMap<QString, double> PressureController::getLastChanged(){
     QMap<QString, double> points;
-    for(auto data : dataMap){
-        points[data->name] = data->y.last();     
-    }
+    points["pressure"] = currentPressure;
+    points["vacuum"] = currentVacuum;
     return points;
 }
 
 void PressureController::stopReading(){
     m_timer->stop();
-    m_timePassed.restart();
-    for(auto data : dataMap){
-        data->clearPoints();
-    }
+    currentPressure = 0;
+    currentVacuum = 0;
 }
