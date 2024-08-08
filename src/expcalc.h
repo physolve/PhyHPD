@@ -22,7 +22,7 @@ public:
     void addAccumulationPoint(const accumulationPoint& aP);
 
     bool steadyStateTrigger();
-    double timeLagCalc();
+    double timeLagCalc(const int &leakEnd, const int &steadyStateStart);
 
     void collectValues(QVector<qreal> &time, QVector<double> &diffusivity, QVector<double> &modeledDiffus); 
 
@@ -31,11 +31,14 @@ private:
     void diffusionFit(QVector<double> &modeledDiffus);
     //UI to property
     unsigned int steadyStatePoints;
-    unsigned int steadyStateSeconds; // close to 60?
+    //unsigned int steadyStateSeconds; // close to 60?
     double steadyStateEps;
     //
-    double m_volume;
+    double m_volume; //cm3 to m3
     double m_sampleArea;
-    double m_thickness;
+    double m_thickness; // mkm to m
     QList<accumulationPoint> m_accumulation;
+
+    double J_0_corr;
+    double J_inf_corr;
 };

@@ -115,9 +115,10 @@ void MainWindow::processEvents(){
 
 void MainWindow::preapreExpCalc(){
     // provide diameter from experimental.qml
-    auto sampleArea = M_PI * pow(0.005,2)/4; // pi*5mm^2 -> m2
+    auto sampleArea = 2.13*pow(10,-4);//M_PI * pow(0.005,2)/4; // pi*5mm^2 -> m2
+    auto secondaryVolume = 1.43*pow(10,-4); //m3
     // provide volume from experimental.qml
-    expCalc.setConstants(10, sampleArea);
+    expCalc.setConstants(secondaryVolume, sampleArea);
     setPointsFromFile();
 
     QVector<qreal> time;
@@ -130,20 +131,23 @@ void MainWindow::preapreExpCalc(){
 }
 
 void MainWindow::setPointsFromFile(){
-    QFile expData("data/log-Mon_Jul_8_2024.txt");
+    QFile expData("data/pseudoData.txt");
 	if (!expData.open(QIODevice::ReadOnly | QIODevice::Text))
 		return;
     QTextStream in(&expData);
     in.readLine(); // skip header
     while (!in.atEnd()) {
         const auto &lineList = in.readLine().split('\t');
-        double p_p = lineList.at(2).toDouble(); //pressure
-        double p_s = lineList.at(3).toDouble(); //vacuum
-        double absTemp = 273 + 500;
+        double p_p = lineList.at(2).toDouble() * pow(10,5); //pressure, bar to Pa
+        double p_s = lineList.at(3).toDouble() * pow(10,5); //vacuum, bar to Pa
+        double absTemp = 273 + 500; // K
         unsigned int t = lineList.at(1).toInt();
         expCalc.addAccumulationPoint(accumulationPoint(p_p,p_s,absTemp,t));
-
-        
+        // unsigned int n = 120;
+        // while(n > 0 && !in.atEnd()){
+        //     in.readLine();
+        //     --n;
+        // }
     }
 }
 
