@@ -51,7 +51,10 @@ void CustomPlotItem::initCustomPlot(int index) {
         //startTimer(500);
 
         connect(m_CustomPlot, &QCustomPlot::afterReplot, this, &CustomPlotItem::onCustomReplot);
-
+        m_CustomPlot->legend->setVisible(true);
+        m_CustomPlot->legend->setBrush(Qt::NoBrush);
+        m_CustomPlot->legend->setTextColor(Qt::white);
+        m_CustomPlot->legend->setBorderPen(QPen(QColor(80, 80, 80), 1, Qt::DotLine));
         qDebug() << QString("QCustomplot (%1) Initialized").arg(index);
 
         // set some pens, brushes and backgrounds:
@@ -117,12 +120,17 @@ void CustomPlotItem::placeExpDataGraph(const QString &name, QSharedPointer<ExpDa
     qDebug() << "add " << name << " to plot " << m_index;
     m_sensors.append(data_ptr);
     m_CustomPlot->addGraph();
-    QStringList lineColors = {"#cb8175", "#e2a97e", "#f0cf8e", "#f6edcd", "#a8c8a6", "#6d8d8a", "#655057" };
+    QStringList lineColors = {"#a8c8a6", "#6d8d8a", "#655057", "#cb8175", "#e2a97e", "#f0cf8e", "#f6edcd"};
     
     auto pen = QPen(QColor(lineColors.value(m_plotNames.count())), 1.5);
-    
-    m_CustomPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, pen, QBrush(Qt::white), 9));
-    m_CustomPlot->graph()->setPen(QPen(QColor(120, 120, 120), 2));
+    // scatter style
+    // m_CustomPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, pen, QBrush(Qt::white), 9));
+    // m_CustomPlot->graph()->setPen(QPen(QColor(120, 120, 120), 2));
+    // line style
+    m_CustomPlot->graph()->setPen(pen);
+    m_CustomPlot->graph()->setLineStyle(QCPGraph::LineStyle::lsLine);
+    m_CustomPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, pen, QBrush(Qt::white), 7));
+
     m_CustomPlot->graph()->setAdaptiveSampling(true);
     m_CustomPlot->graph()->setName(name);
     m_plotNames << name;

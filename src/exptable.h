@@ -8,9 +8,11 @@ class ExpTable : public QAbstractTableModel
     Q_PROPERTY(QString resultStr READ getResultStr NOTIFY resultChanged)
 public:
     enum Column {
-        TimeColumn,
-        FluxColumn,
-        PermeationColumn
+        ExpTime,
+        Flux,
+        Diffusivity,
+        ModelledDiffus,
+        Permeation
     };
     enum TableRole {
         NameRole = Qt::UserRole,
@@ -30,8 +32,8 @@ public:
     
     QString getResultStr() const;
 
-    void appendData(const QVector<qreal> &timeList);
-    void appendData(const QVector<double> &dataList, const QString &dataName);
+    void appendDataExp(const QVector<qreal> &timeList);
+    void appendDataExp(const QVector<double> &dataList, const QString &dataName);
 signals:
     void resultChanged(QString);
 private:

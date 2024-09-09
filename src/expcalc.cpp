@@ -1,7 +1,7 @@
 #include "expcalc.h"
 #include <math.h>
 
-ExpCalc::ExpCalc(QObject *parent) : QObject(parent), m_volume(0.0005), m_sampleArea(1), m_thickness(0.001)
+ExpCalc::ExpCalc(QObject *parent) : QObject(parent), currentExp({1,1,1})
 {
 
 }
@@ -10,9 +10,8 @@ ExpCalc::~ExpCalc(){
     
 }
 
-void ExpCalc::setConstants(double volumeChamber, double areaSample){
-    this->m_volume = volumeChamber;
-    this->m_sampleArea = areaSample;
+void ExpCalc::setConstants(const QVariantMap &expParametersMap){
+    currentExp = expParameters{expParametersMap["sideVolume"].toDouble(), expParametersMap["thickness"].toDouble() * pow(10, -3), M_PI * pow(expParametersMap["diameter"].toDouble(),2)/4};
 }
 
 void ExpCalc::addAccumulationPoint(const accumulationPoint& aP){
@@ -72,16 +71,16 @@ double ExpCalc::timeLagCalc(const int &leakEnd, const int &steadyStateStart){
     return -b/a-leakEnd; 
 }
 
-void ExpCalc::collectValues(QVector<qreal> &time, QVector<double> &diffusivity, QVector<double> &modeledDiffus){
+void ExpCalc::collectValues(QVector<qreal> &time, QVector<double> &flux, QVector<double> &diffusivity, QVector<double> &modeledDiffus, QVector<double> &permeation){
 
     for(const auto &i : m_accumulation){ // diffusivity times starts from leak
         time << i.t;
     }
-    calculateFlux(diffusivity);
+    calculateFlux(flux, diffusivity, permeation);
     diffusionFit(modeledDiffus);
 }
 
-void ExpCalc::calculateFlux(QVector<double> &diffusivity){
+void ExpCalc::calculateFlux(QVector<double> &flux, QVector<double> &diffusivity, QVector<double> &permeability){
     // to change m_accumulation with averaged values or different time range use argument of this function
     
     //dn_leak/dt -> moles change during valve open (as very low rate) 
@@ -100,19 +99,20 @@ void ExpCalc::calculateFlux(QVector<double> &diffusivity){
     QList<double> J_inf{0};
     // double p_buff = m_accumulation.first().p_s;
     // double t_buff = m_accumulation.first().t;
-    QVector<double> permeability;
+    // QVector<double> permeability;
     for(int i = 1; i < m_accumulation.count(); ++i){ // trough selected data
         const auto& p = m_accumulation.at(i); // curr point
         const auto& o = m_accumulation.at(i-1); // prev point
-        J_vals << m_volume / (Rgas * p.absTemp) * (p.p_s - o.p_s) / (p.t-o.t) * 1 / m_sampleArea; // actually J(t) 
+        J_vals << currentExp.volume / (Rgas * p.absTemp) * (p.p_s - o.p_s) / (p.t-o.t) * 1 / currentExp.sampleArea; // actually J(t) basically flux
         if(p.t > leakStart && p.t < leakEnd){
+            permeability << 0;
             J_leak << J_vals.last();
         }
         else{
-            permeability << J_vals.last() * m_thickness / (sqrt(p.p_p) - sqrt(p.p_s)); //?
+            permeability << J_vals.last() * currentExp.thickness / (sqrt(p.p_p) - sqrt(p.p_s)); //?
             if(p.t > steadyStateStart){
                 J_inf << J_vals.last();
-            }  
+            }
         }
         // is it right?
         // p_buff = p.p_s;
@@ -122,6 +122,8 @@ void ExpCalc::calculateFlux(QVector<double> &diffusivity){
     //  than J_0 = 1/A*dn_leak/dt
     //  and J_inf = 1/A*dn_inf/dt
     //  permeation J = J_inf - J_0 as for permeation in peak
+
+    // split to another function 
     J_0_corr = J_leak.last(); // or not last
     J_inf_corr = J_inf.last(); // or not last
     for(const auto &val : J_vals){
@@ -131,6 +133,8 @@ void ExpCalc::calculateFlux(QVector<double> &diffusivity){
             curDiff = 0;
         diffusivity << curDiff;
     }
+
+    flux = J_vals;
 }
 
 void ExpCalc::diffusionFit(QVector<double> &modeledDiffus){
@@ -139,8 +143,8 @@ void ExpCalc::diffusionFit(QVector<double> &modeledDiffus){
     unsigned int steadyStateStart = 600;
     unsigned int leakEnd = 330;
     // function to east squares method fit
-    double initialD = pow(m_thickness, 2) / (6 * timeLagCalc(leakEnd, steadyStateStart));
-    const double L = m_thickness;
+    double initialD = pow(currentExp.thickness, 2) / (6 * timeLagCalc(leakEnd, steadyStateStart));
+    const double L = currentExp.thickness;
     auto f = [initialD, L] (unsigned int t){
         double sum = 0;
         for(int n = 1; n <= 20; ++n){

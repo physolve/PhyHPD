@@ -29,7 +29,6 @@ public:
     Q_INVOKABLE void onReadButtonClicked(bool s);
     Q_INVOKABLE void openSerialPort();
     Q_INVOKABLE void closeSerialPort();
-
     Q_INVOKABLE void preapreExpCalc();
 
 signals:

@@ -150,7 +150,7 @@ Item{
         // anchors.right: parent.right
         Repeater{
             id: barGraphRepeater
-            model: ["Pressure", "Vacuum", "Diffusivity"]
+            model: ["Pressure", "Vacuum", "Flux", "Diffusivity", "Permeation"]
             TabButton{
                 text: modelData
                 width: Math.max(100, tabBar.width/5)
@@ -164,7 +164,9 @@ Item{
             // tabBar.addItem(newTabButton);
             // tabBar.setCurrentIndex(tabBar.count - 1);
             // return webview;
-            chartExpData.createObject(tabLayout,{plotName: "Diffusivity", sensorsList: ["flux","permeation"], m_index: 0, label: "Диффузия"})
+            chartExpData.createObject(tabLayout,{plotName: "Flux", sensorsList: ["flux"], m_index: 0, label: "Поток"})
+            chartExpData.createObject(tabLayout,{plotName: "Diffusivity", sensorsList: ["diffusivity","modeldiffus"], m_index: 0, label: "Диффузия"})
+            chartExpData.createObject(tabLayout,{plotName: "Permeation", sensorsList: ["permeation"], m_index: 0, label: "Проницаемость"})
         }
         function removeView(index) {
             tabBar.removeItem(index);

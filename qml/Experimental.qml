@@ -7,20 +7,31 @@ GroupBox {
     id: base
     width: parent.width
     height: parent.height
+    SampleLoader {
+        id: sampleLoader
+        source: "file:///C:/Users/mitya/source/repos/MHgrph/build/Debug/data/pseudoSample.json"
+    }
+    function setSampleParameters(sampleName){
+        let sampleParameters = sampleLoader.jsonObject[sampleName]
+        thickness.text = sampleParameters.thickness_mm
+        diameter.text = sampleParameters.diameter_m.toExponential(3)
+        sideVolume.text = sampleParameters.sideVolume_m3.toExponential(3)
+    }
     ScrollView {
         anchors.fill: parent
         anchors.margins: 10
-        contentWidth: gridExp.width    // The important part
-        contentHeight: gridExp.height + calcCol.height + 10  // Same
-        clip : true                   // Prevent drawing column outside the scrollview borders
+        contentWidth: gridExp.width + 10
+        contentHeight: gridExp.height + gridSample.height + gridResult.height + calcCol.height + 10  // Same
+        clip: true
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
         ScrollBar.vertical.policy: ScrollBar.AsNeeded
-        GridLayout{
+
+        GridLayout {
             id: gridExp
             width: base.width - 40
             anchors.top: parent.top
             anchors.left: parent.left
-            implicitHeight: 400
+            implicitHeight: 200
             flow: GridLayout.LeftToRight
             columns: base.width/220
             rowSpacing: 20
@@ -82,35 +93,120 @@ GroupBox {
                     horizontalAlignment: TextInput.AlignHCenter
                 }
             }
+        }
+        GridLayout {
+            id: gridSample
+            width: base.width - 40
+            anchors.top: gridExp.bottom
+            anchors.left: parent.left
+            anchors.topMargin: 10
+            implicitHeight: 200
+            flow: GridLayout.LeftToRight
+            columns: base.width/220
+            rowSpacing: 10
+            Layout.preferredWidth: 200 
+
+            ComboBox{
+                id: sampleChoose
+                width: 210
+                height: 40
+                model: Object.keys(sampleLoader.jsonObject)
+                font.pointSize: 10
+                onActivated: setSampleParameters(currentText)
+                Component.onCompleted: currentIndex = -1
+            }
+            Button{
+                id: applyParameters
+                width: 130
+                text : "Apply parameters"
+                font.pointSize: 10
+                onClicked: {
+                    let parameters = {}
+                    parameters["sideVolume"] = sideVolume.text //m3
+                    parameters["thickness"] = thickness.text //["micron", "mm", "cm"] -> m or only mm?
+                    parameters["diameter"] = diameter.text; //m
+                    expCalc.setConstants(parameters)
+                }
+            }
             Row{
-                //Layout.preferredWidth: 160 
-                spacing: 5
+                spacing: 10
                 Label{
-                    width: 60
-                    text: "Thickness"
+                    width: 120
+                    text: "Thickness, mm"
                     font.pointSize: 12
                     anchors.verticalCenter: parent.verticalCenter
                 }
                 TextField{
                     id: thickness
-                    width: 60
-                    text : "50.000"
-                    font.pointSize: 10
-                    validator: DoubleValidator { bottom: 0.001; top: 10000; decimals: 3}
+                    width: 80
+                    text : "1.000"
+                    font.pointSize: 12
+                    validator: DoubleValidator { bottom: 1e-12; top: 10000; decimals: 2}
+                    selectByMouse: true
                     anchors.verticalCenter: parent.verticalCenter
                     horizontalAlignment: TextInput.AlignHCenter
                 }
-                ComboBox{
-                    id: thickDimension
-                    width: 100
-                    height: 40
-                    model: ["micron", "mm", "cm"]
-                    font.pointSize: 10
+                // ComboBox{
+                //     id: thickDimension
+                //     width: 100
+                //     height: 40
+                //     model: ["micron", "mm", "cm"]
+                //     currentIndex: 1
+                //     font.pointSize: 12
+                //     anchors.verticalCenter: parent.verticalCenter
+                // }
+            }
+            Row{
+                spacing: 10
+                Label{
+                    width: 120
+                    text: "Diameter, m"
+                    font.pointSize: 12
                     anchors.verticalCenter: parent.verticalCenter
+                }
+                TextField{
+                    id: diameter
+                    width: 80
+                    text : "1.000"
+                    font.pointSize: 12
+                    validator: DoubleValidator { bottom: 1e-12; top: 10000; decimals: 2}
+                    selectByMouse: true
+                    anchors.verticalCenter: parent.verticalCenter
+                    horizontalAlignment: TextInput.AlignHCenter
                 }
             }
             Row{
-                //Layout.preferredWidth: 160 
+                spacing: 10
+                Label{
+                    width: 120
+                    text: "Side Volume, m3"
+                    font.pointSize: 12
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                TextField{
+                    id: sideVolume
+                    width: 80
+                    text : "1.000"
+                    font.pointSize: 12
+                    validator: DoubleValidator { bottom: 1e-12; top: 10000; decimals: 2}
+                    selectByMouse: true
+                    anchors.verticalCenter: parent.verticalCenter
+                    horizontalAlignment: TextInput.AlignHCenter
+                }
+            }
+        }
+        GridLayout {
+            id: gridResult
+            width: base.width - 40
+            anchors.top: gridSample.bottom
+            anchors.left: parent.left
+            anchors.topMargin: 10
+            implicitHeight: 200
+            flow: GridLayout.LeftToRight
+            columns: base.width/220
+            rowSpacing: 20
+            Layout.preferredWidth: 200 
+            Row{
                 spacing: 10
                 Label{
                     width: 80
@@ -128,8 +224,7 @@ GroupBox {
                 }
             }
             Row{
-                //Layout.preferredWidth: 160 
-                spacing: 5
+                spacing: 10
                 Button{
                     width: 120
                     text: "Log path"
@@ -143,8 +238,7 @@ GroupBox {
                 }
             }
             Row{
-                //Layout.preferredWidth: 160 
-                spacing: 5
+                spacing: 10
                 Button{
                     width: 120
                     text: "Spectrum path"
@@ -158,8 +252,7 @@ GroupBox {
                 }
             }
             Row{
-                //Layout.preferredWidth: 160 
-                spacing: 5
+                spacing: 10
                 Label{
                     width: 100
                     text: "Now phase"
@@ -177,8 +270,9 @@ GroupBox {
         ColumnLayout{
             id: calcCol
             width: base.width - 40
-            anchors.top: gridExp.bottom
+            anchors.top: gridResult.bottom
             anchors.left: parent.left
+            anchors.topMargin: 10
             implicitHeight: 200
             spacing: 10
             //Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
@@ -206,7 +300,6 @@ GroupBox {
                     to: 100
                     stepSize: 10
                     snapMode: Slider.SnapOnRelease
-
                     // background: Rectangle {
                     //     x: avgSlider.leftPadding
                     //     y: avgSlider.topPadding + avgSlider.availableHeight / 2 - height / 2
@@ -241,7 +334,6 @@ GroupBox {
                     //         radius: 2
                     //     }
                     // }
-
                     // handle: Rectangle {
                     //     x: avgSlider.leftPadding + avgSlider.visualPosition * (avgSlider.availableWidth - width)
                     //     y: avgSlider.topPadding + avgSlider.availableHeight / 2 - height / 2
@@ -304,7 +396,6 @@ GroupBox {
                     width: tableView.leftMargin
                     height: tableView.topMargin
                 }
-
                 Row {
                     id: columnsHeader
                     y: tableView.contentY
@@ -338,36 +429,13 @@ GroupBox {
                             font.pixelSize: 15
                             padding: 10
                             verticalAlignment: Text.AlignVCenter
-
                             background: Rectangle { color: "#333333" }
                         }
                     }
                 }
-
                 ScrollIndicator.horizontal: ScrollIndicator { }
                 ScrollIndicator.vertical: ScrollIndicator { }
             }
         }
     }
-
 }
-
-/*
-    ButtonGroup {
-        id: btnGroup
-        buttons: column.children
-        exclusive: false
-    }
-
-    Column {
-        id: column
-        Button { text: "First" ; checkable: true }
-        Button { text: "Second"; checkable: true }
-        Button { text: "Third" ; checkable: true }
-    }
-    Button{
-        anchors.bottom: parent.bottom
-        text: "Apply"
-        onClicked: console.log("Pressed: ", btnGroup.checkState)
-    }
-*/

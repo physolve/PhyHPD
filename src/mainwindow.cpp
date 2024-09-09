@@ -27,8 +27,8 @@ MainWindow::MainWindow(int &argc, char **argv)
     //m_engine.rootContext()->setContextProperty("table_model", &m_expTable);
     m_engine.rootContext()->setContextProperty("mnemostate", &m_mnemoState);
     m_engine.rootContext()->setContextProperty("dataModel", &m_dataModel);
+    m_engine.rootContext()->setContextProperty("expCalc", &expCalc);
 
-    
     initController();
 
     initDataSet();
@@ -55,7 +55,7 @@ void MainWindow::initController(){
     }
 }
 
-void MainWindow::initDataSet(){
+void MainWindow::initDataSet(){ // I don't like this 
     auto dataSetTest = new ExpTable();
     m_engine.rootContext()->setContextProperty("table_model", dataSetTest);
     m_expDataSet["dataSetTest"] = dataSetTest;
@@ -102,32 +102,27 @@ void MainWindow::processEvents(){
     m_dataModel.appendData(c_pressure, c_vacuum);
     bool doingExp = false;
     if(doingExp){
-        //c_map["time"] = m_dataModel.getLastTime(); // change to larger map with additional info or regain timed data
-        //
+        // c_map["time"] = m_dataModel.getLastTime(); // change to larger map with additional info or regain timed data
+        
         // currently feed m_expDataSet with log data
-        //
+        
         // here make all the calculations using m_dataModel data in ExpCalc then to m_expDataSet
     }
     QString line = QString("%1\t%2\t%3").arg(c_time).arg(c_pressure).arg(c_vacuum);
     m_writeLog.writeLine(line);
 }
 
-
 void MainWindow::preapreExpCalc(){
-    // provide diameter from experimental.qml
-    auto sampleArea = 2.13*pow(10,-4);//M_PI * pow(0.005,2)/4; // pi*5mm^2 -> m2
-    auto secondaryVolume = 1.43*pow(10,-4); //m3
-    // provide volume from experimental.qml
-    expCalc.setConstants(secondaryVolume, sampleArea);
     setPointsFromFile();
 
     QVector<qreal> time;
-    QVector<double> diffusivity, modeledDiffus;
-    expCalc.collectValues(time, diffusivity, modeledDiffus);
-    m_expDataSet[currentDataSet]->appendData(time);
-    m_expDataSet[currentDataSet]->appendData(diffusivity, "flux");
-    m_expDataSet[currentDataSet]->appendData(modeledDiffus, "permeation");
-
+    QVector<double> diffusivity, modeledDiffus, permeation{0}, flux;
+    expCalc.collectValues(time, flux, diffusivity, modeledDiffus, permeation);
+    m_expDataSet[currentDataSet]->appendDataExp(time);
+    m_expDataSet[currentDataSet]->appendDataExp(flux, "flux");
+    m_expDataSet[currentDataSet]->appendDataExp(diffusivity, "diffusivity");
+    m_expDataSet[currentDataSet]->appendDataExp(modeledDiffus, "modeldiffus");
+    m_expDataSet[currentDataSet]->appendDataExp(permeation, "permeation");
 }
 
 void MainWindow::setPointsFromFile(){

@@ -4,9 +4,13 @@
 ExpTable::ExpTable(QObject *parent)
     : QAbstractTableModel(parent), currentDataCount(0)
 {
-    header << "Time" << "Flux" << "Permeation";
+    header << "Time" << "Flux"<< "Diffusivity" << "Model Diffus" << "Permeation";
     m_expData["time"] = QSharedPointer<ExpData>::create("time", 0); // 0 - dataset id
     m_expData["flux"] = QSharedPointer<ExpData>::create("flux", 0); // 0 - dataset id
+
+    m_expData["diffusivity"] = QSharedPointer<ExpData>::create("diffusivity", 0); // 0 - dataset id
+    m_expData["modeldiffus"] = QSharedPointer<ExpData>::create("modeldiffus", 0); // 0 - dataset id
+    
     m_expData["permeation"] = QSharedPointer<ExpData>::create("permeation", 0); // 0 - dataset id
     // for(int n = 0; n < rowCount(); ++n){
     //     m_exp.time.append(n+1);
@@ -53,12 +57,21 @@ QVariant ExpTable::data(const QModelIndex &index, int role) const
             && index.row() >= 0 && index.row() < rowCount()
             && index.column() >= 0 && index.column() < columnCount()){
         switch(index.column()){
-            case TimeColumn:
+            case ExpTime:
                 return m_expData["time"]->getValue().at(index.row());
-            case FluxColumn:
+                break;
+            case Flux:
                 return QString("%1").arg(m_expData["flux"]->getValue().at(index.row()), 0, 'f', 3);
-            case PermeationColumn:
+                break;
+            case Diffusivity:
+                return QString("%1").arg(m_expData["diffusivity"]->getValue().at(index.row()), 0, 'f', 3);
+                break;
+            case ModelledDiffus:
+                return QString("%1").arg(m_expData["modeldiffus"]->getValue().at(index.row()), 0, 'f', 3);
+                break;
+            case Permeation:
                 return QString("%1").arg(m_expData["permeation"]->getValue().at(index.row()), 0, 'f', 3);
+                break;
             default: break;
         }
         // THOSE ROLES FOR WHAT?
@@ -83,7 +96,7 @@ QHash<int, QByteArray> ExpTable::roleNames() const
     return mapping;
 }
 
-void ExpTable::appendData(const QVector<qreal> &timeList){
+void ExpTable::appendDataExp(const QVector<qreal> &timeList){
     if(timeList.isEmpty())
         return;
     const auto &firstValue = timeList.first();
@@ -94,7 +107,7 @@ void ExpTable::appendData(const QVector<qreal> &timeList){
     m_expData["time"]->setData(corrTimeList, timeList);
 }
 //change to set data
-void ExpTable::appendData(const QVector<double> &dataList, const QString &dataName){ // not tested
+void ExpTable::appendDataExp(const QVector<double> &dataList, const QString &dataName){ // not tested
     if(dataList.isEmpty())
         return;
     // m_expData: currentDataSet: "ZeroFlux", "ZeroPermeation"

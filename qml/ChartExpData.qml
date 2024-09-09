@@ -19,6 +19,7 @@ Item {
         Component.onCompleted: {
             initCustomPlot(0)
             for(const sensorName of sensorsList){
+                // rewrite what I need
                 placeExpDataGraph(sensorName, table_model.getExpData(sensorName))
             }
             setCustomLabel(label)
