@@ -22,22 +22,40 @@ struct expParameters{
 class ExpCalc : public QObject
 {
 	Q_OBJECT
-
+    Q_PROPERTY(double timeLagVal READ timeLagVal NOTIFY timeLagValChanged)
+    Q_PROPERTY(unsigned int steadyStateStart READ steadyStateStart NOTIFY steadyStateStartChanged)
+    Q_PROPERTY(unsigned int leakStart READ leakStart NOTIFY leakStartChanged)
+    Q_PROPERTY(unsigned int leakEnd READ leakEnd NOTIFY leakEndChanged)
 public:
     ExpCalc(QObject *parent = 0);
 	~ExpCalc();
+    void setFileTimes();
     void addAccumulationPoint(const accumulationPoint& aP);
 
     bool steadyStateTrigger();
-    double timeLagCalc(const int &leakEnd, const int &steadyStateStart);
 
     void collectValues(QVector<qreal> &time, QVector<double> &flux, QVector<double> &diffusivity, QVector<double> &modeledDiffus, QVector<double> &permeation);
 
+    double timeLagVal() const;
+    unsigned int steadyStateStart() const;
+    unsigned int leakStart() const;
+    unsigned int leakEnd() const;
+
     Q_INVOKABLE void setConstants(const QVariantMap &expParametersMap);
 
+    void reCalculateDiffusFit(QVector<double> &modeledDiffus, const double &corrTimeLagVal);
+    void reCalculateNewTime(unsigned int steadyStateStart, unsigned int leakStart, unsigned int leakEnd);
+
+signals:
+    void timeLagValChanged();
+    void steadyStateStartChanged();
+    void leakStartChanged();
+    void leakEndChanged();
 private:
+    double timeLagCalc();
     void calculateFlux(QVector<double> &flux, QVector<double> &diffusivity, QVector<double> &permeation); // change of pressure per time, current absolute temperature
     void diffusionFit(QVector<double> &modeledDiffus);
+    void setTimeLagCalc(const double &val);
     //UI to property
     unsigned int steadyStatePoints;
     //unsigned int steadyStateSeconds; // close to 60?
@@ -48,4 +66,10 @@ private:
 
     double J_0_corr;
     double J_inf_corr;
+
+    // correct from qml
+    unsigned int m_steadyStateStart;
+    unsigned int m_leakStart; // second elapsed when valve open
+    unsigned int m_leakEnd; // second elapsed after valve open
+    double m_timeLagVal;
 };

@@ -6,6 +6,8 @@
         <file>qml/Graphs.qml</file>
         <file>qml/ChartExpData.qml</file>
         <file>qml/Experimental.qml</file>
+        <file>qml/Parameters.qml</file>
+        <file>qml/Results.qml</file>
         <file>qml/SampleLoader.qml</file>
         <file>qml/mnemo/Mnemo.ui.qml</file>
         <file>qml/mnemo/CircularSlider.qml</file>

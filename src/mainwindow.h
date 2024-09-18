@@ -31,6 +31,9 @@ public:
     Q_INVOKABLE void closeSerialPort();
     Q_INVOKABLE void preapreExpCalc();
 
+    Q_INVOKABLE void reCalculateDiffusFit(double corrTimeLagVal); //test
+    Q_INVOKABLE void reCalculateNewTime(unsigned int steadyStateStart, unsigned int leakStart, unsigned int leakEnd); //test
+
 signals:
     void logChanged(QString);
 
@@ -40,6 +43,7 @@ private slots:
 
 private:
     void setPointsFromFile();
+    void calcToPlot();
     
     SettingsDialog *m_settings = nullptr;
 

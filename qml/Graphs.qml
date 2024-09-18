@@ -12,7 +12,7 @@ Item{
             required property int m_index
             property bool isDetachable: true
             required property string label
-            //anchors.left: parent.left; 
+            //anchors.left: parent.left
             implicitWidth: 450
             implicitHeight: 350
             CustomPlotItem {
