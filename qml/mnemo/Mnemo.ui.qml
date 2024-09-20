@@ -9,20 +9,34 @@ Rectangle {
     height: 760
     color: "transparent"
 
-    function setPresValues(presValues) {
-        slider1.value = presValues.pressure
-        slider2.value = presValues.vacuum
+    function setPres(presValue){
+        slider1.value = presValue
     }
-    Connections {
+    function setVacuum(vacValue){
+        slider2.value = vacValue
+    }
+    function setTime(timeValue){
+        console.log(timeValue)
+    }
+
+    Connections{
         target: dataModel
-        function onDataChanged(topLeft, bottomRight, roles) {
-            let valuesArray = {}
-            for(let i = 0; i < bottomRight.row; i++){
-                valuesArray[_myModel.data(_myModel.index(i,0),256)] = _myModel.data(_myModel.index(i,0),260) // shit models
-            }
-            setPresValues(valuesArray) // there all (fuck)
+        function onDataChanged(topLeft, bottomRight, roles){
+            setPres(dataModel.data(dataModel.index(bottomRight.row, 0), 258)) //fine for now
+            setVacuum(dataModel.data(dataModel.index(bottomRight.row, 0), 259)) //fine for now
         }
     }
+
+    // Connections {
+    //     target: dataModel
+    //     function onDataChanged(topLeft, bottomRight, roles) {
+    //         let valuesArray = {}
+    //         for(let i = 0; i < bottomRight.row; i++){
+    //             valuesArray[dataModel.data(dataModel.index(i,0),256)] = dataModel.data(dataModel.index(i,0),260) // shit models
+    //         }
+    //         setPresValues(valuesArray) // there all (fuck)
+    //     }
+    // }
     //set-Pres-Values
 
     function sendValveToBack(name, checked){

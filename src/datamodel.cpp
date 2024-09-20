@@ -9,7 +9,6 @@
 DataModel::DataModel(QObject *parent) :
     QAbstractListModel(parent)
 {
-
     m_trData["pressure"] = QSharedPointer<ControllerData>::create("pressure", 2.6046, -2.4978);
     m_trData["vacuum"] = QSharedPointer<ControllerData>::create("vacuum", 0.1303, -0.1253);
 }
@@ -24,7 +23,7 @@ int DataModel::rowCount( const QModelIndex& parent) const
     if (parent.isValid())
         return 0;
 
-    return m_trData.count();
+    return m_trData["pressure"]->getTime().count();
 }
 
 QVariant DataModel::data(const QModelIndex &index, int role) const
@@ -35,19 +34,17 @@ QVariant DataModel::data(const QModelIndex &index, int role) const
 
     // auto sensor = this->m_sensors[allNames.at(index.row())];
 
-    const auto it = m_trData.begin() + index.row();
+    // const auto it = m_trData.begin() + index.row();
 
     if ( role == NameRole ){
-        return it.value()->m_name;
+        return QString("data asked %1").arg(m_time.elapsed()/1000);
     }
     else if ( role == Time )
-        return QVariant::fromValue(it.value()->getTime());
-    else if ( role == Value )
-        return QVariant::fromValue(it.value()->getValue());
-    else if ( role == CurTime)
-        return QVariant::fromValue(it.value()->getCurTime());
-    else if ( role == CurValue)
-        return QVariant::fromValue(it.value()->getCurValue());
+        return QVariant::fromValue(m_trData["pressure"]->getTime().at(index.row()));
+    else if ( role == Pressure)
+        return QVariant::fromValue(m_trData["pressure"]->getValue().at(index.row()));
+    else if ( role == Vacuum)
+        return QVariant::fromValue(m_trData["vacuum"]->getValue().at(index.row()));
     else
         return QVariant();
 }
@@ -57,10 +54,9 @@ QHash<int, QByteArray> DataModel::roleNames() const
 {
     static QHash<int, QByteArray> mapping {
         {NameRole, "name"},
-        {Time, "x"},
-        {Value, "y"},
-        {CurTime, "ct"},
-        {CurValue, "cv"}
+        {Time, "t"},
+        {Pressure, "p"},
+        {Vacuum, "v"}
     };
     return mapping;
 }
@@ -78,11 +74,13 @@ void DataModel::appendData(const double & pressureVoltage, const double & vacuum
     m_trData["vacuum"]->addPoint(time, vacuumVoltage);
 
     const QModelIndex startIndex = index(0, 0);
-    const QModelIndex endIndex   = index(m_trData.count() - 1, 0);
+    const QModelIndex endIndex   = index(m_trData["pressure"]->getTime().count() - 1, 0);
     // ...but only the population field
-    emit dataChanged(startIndex, endIndex, QVector<int>() << Time << Value << CurTime << CurValue );
+    emit dataChanged(startIndex, endIndex, QVector<int>() << Time << Pressure << Vacuum);
 }
 
-double DataModel::getLastTime(){
-    return data(index(m_trData.count()-1),DataModel::Roles::Time).toDouble();
-}
+// dataStruct DataModel::getRangedCollection(unsigned int from, unsigned int to){
+//     auto data(index(rowHelp::Pressure), DataModel::Roles::Time).toList();
+    
+//     return 
+// }

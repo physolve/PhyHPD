@@ -8,9 +8,9 @@ GroupBox {
     id: parameters
     width: parent.width
     height: parent.height
-    SampleLoader {
+    SampleLoader { // path is shit, try resources
         id: expLoader
-        source: "file:///C:/Users/mitya/source/repos/MHgrph/build/Debug/data/pseudoSampleReport.json"
+        source: "file:///F:/MHgrph/build/Debug/data/pseudoSampleReport.json"
     }
     function toHHMMSS(secs) { // seems working
         let newDate = new Date(secs * 1000).toISOString().slice(11, 19);

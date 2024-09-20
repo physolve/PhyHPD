@@ -112,6 +112,18 @@ void MainWindow::processEvents(){
     m_writeLog.writeLine(line);
 }
 
+void MainWindow::feedExpValues(){
+    // this function take values from m_dataModel and pass to addAccumulationPoint
+    // but it should be ranged right
+    
+    // auto currentIndex = m_dataModel.index(tableColumns::Pressure);
+    // const auto &timeData = m_dataModel.data(currentIndex, DataModel::Roles::Time).toList();
+    // const auto &pressureData = m_dataModel.data(currentIndex, DataModel::Roles::Value);
+    // currentIndex = m_dataModel.index(tableColumns::Vacuum);
+    // const auto &vacuumData = m_dataModel.data(currentIndex, DataModel::Roles::Value);
+    // qDebug() << timeData
+}
+
 void MainWindow::calcToPlot(){
     QVector<qreal> time;
     QVector<double> diffusivity, modeledDiffus, permeation{0}, flux;

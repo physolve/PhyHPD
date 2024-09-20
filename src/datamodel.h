@@ -6,14 +6,13 @@
 
 class DataModel : public QAbstractListModel
 {
-    Q_OBJECT 
+    Q_OBJECT
 public:
     enum Roles {
         NameRole = Qt::UserRole,
         Time,
-        Value,
-        CurTime,
-        CurValue,
+        Pressure,
+        Vacuum
     };
 
     explicit DataModel(QObject *parent = nullptr);
@@ -26,7 +25,7 @@ public:
 
     void initializeAcquisition();
     void appendData(const double & pressureVoltage, const double & vacuumVoltage);
-    double getLastTime();
+    // dataStruct getRangedCollection(unsigned int fromSec, unsigned int toSec);
 signals:
     void channelMapListChanged();
 
