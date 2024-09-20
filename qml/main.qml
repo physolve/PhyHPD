@@ -12,6 +12,7 @@ ApplicationWindow {
     title: qsTr("MHgrph")
     Material.theme: Material.Dark
     Material.accent: Material.Indigo
+    font.capitalization: Font.MixedCase
     ObjectModel
     {
         id: mainContainer
@@ -47,6 +48,7 @@ ApplicationWindow {
                     TabButton{
                         text: modelData
                         width: Math.max(120, barMain.width/3)
+                        font.pointSize: 12
                     }
                 }
             }

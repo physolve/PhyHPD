@@ -81,8 +81,8 @@ Item{
             // }
         }  
     }
-
-    Component {
+    /*UNUSED*/
+    Component { 
         id: tabButtonComponent
 
         TabButton {
@@ -134,7 +134,7 @@ Item{
             }
         }
     }
-
+    /*UNUSED*/
     Component{
         id: chartExpData
         ChartExpData{
@@ -154,6 +154,7 @@ Item{
             TabButton{
                 text: modelData
                 width: Math.max(100, tabBar.width/5)
+                font.pointSize: 12
             }
         }
         Component.onCompleted: createTab() /*!!!*/

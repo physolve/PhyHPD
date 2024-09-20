@@ -17,6 +17,7 @@ Item{
             TabButton{
                 text: modelData
                 width: Math.max(120, barExp.width/2)
+                font.pointSize: 12
             }
         }
     }

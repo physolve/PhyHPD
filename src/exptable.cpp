@@ -120,9 +120,3 @@ void ExpTable::appendDataExp(const QVector<double> &dataList, const QString &dat
     // ...but only the population field
     emit dataChanged(startIndex, endIndex, QVector<int>() << Time << Value << CurTime << CurValue );
 }
-
-QString ExpTable::getResultStr() const
-{
-    const QString &text = "Time offset 22 \n Hard stop duration 65 \n Data min: 7.998e-10; Data max 1.1933e-09 \n jnif 0.2442 Time: 14; jnif 0.5 Time: 5.016; jnif 0.6266 Time: 32.016 \n Diffusion_0.2442 Result: 1.63827e-11; Diffusion_0.5 Result: 6.92229e-11; \n Diffusion_0.6266 Result: 1.30143e-11 \n Average flux: 3.13293e-05. Average permeation: 4.48801e-09 \n Average flux deviation: 0.000969569. Average permeation deviation: 1.38841e-07";
-    return text;
-}

@@ -23,7 +23,7 @@ Item{
             id: testPressValve
             width: 120
             text : "Test to press valve"
-            font.pointSize: 10
+            font.pointSize: 11
             onClicked: askToPress.open()
         }
         MessageDialog{
@@ -52,6 +52,7 @@ Item{
         Button{
                 id: configurePressureBtn
                 text: qsTr("Configure pressure")
+                font.pointSize: 11
                 onClicked: {
                     pressureDialog.show()
                 }

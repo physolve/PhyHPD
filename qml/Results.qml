@@ -39,7 +39,7 @@ GroupBox {
                     width: 100
                     height: 40
                     model: ["m²/s", "cm²/s"]
-                    font.pointSize: 10
+                    font.pointSize: 11
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
@@ -70,7 +70,7 @@ GroupBox {
                     id: applyCorTimeLagVal
                     width: 150
                     text : "Apply new time lag"
-                    font.pointSize: 10
+                    font.pointSize: 11
                     onClicked: {
                         backend.reCalculateDiffusFit(resultTimeLagSlider.value)
                     }
@@ -100,17 +100,16 @@ GroupBox {
                     font.pointSize: 12
                     anchors.verticalCenter: parent.verticalCenter
                     horizontalAlignment: TextInput.AlignHCenter
-                    // validator: DoubleValidator { bottom: 1e-12; top: 10000; decimals: 3}
+                    validator: DoubleValidator { bottom: 1e-12; decimals: 3} //is it necessary? 
                     selectByMouse: true
                 }
-                
             }
             Row{
                 spacing: 10
                 Button{
                     width: 120
                     text: "Log path"
-                    font.pointSize: 10
+                    font.pointSize: 11
                 }
                 TextField{
                     id: logPath
@@ -124,7 +123,7 @@ GroupBox {
                 Button{
                     width: 120
                     text: "Spectrum path"
-                    font.pointSize: 10
+                    font.pointSize: 11
                 }
                 TextField{
                     id: spectrumPath
@@ -145,7 +144,7 @@ GroupBox {
                     id: experimentState
                     width: 120
                     text : "Diffusion"
-                    font.pointSize: 10
+                    font.pointSize: 11
                 }
             }
         }
@@ -232,12 +231,12 @@ GroupBox {
                 Button{
                     width: 120
                     text: "Calculate"
-                    font.pointSize: 10
+                    font.pointSize: 11
                 }
                 Button{
                     width: 150
                     text: "Test set constants"
-                    font.pointSize: 10
+                    font.pointSize: 11
                     onClicked: backend.preapreExpCalc()
                 }
             }
@@ -245,7 +244,7 @@ GroupBox {
                 id: resultText
                 //Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
                 placeholderText: qsTr("Enter description")
-                text: table_model.resultStr
+                text: expCalc.resultStr
             }
             TableView {
                 id: tableView

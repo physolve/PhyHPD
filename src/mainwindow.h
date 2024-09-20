@@ -32,7 +32,7 @@ public:
     Q_INVOKABLE void preapreExpCalc();
 
     Q_INVOKABLE void reCalculateDiffusFit(double corrTimeLagVal); //test
-    Q_INVOKABLE void reCalculateNewTime(unsigned int steadyStateStart, unsigned int leakStart, unsigned int leakEnd); //test
+    Q_INVOKABLE void reCalculateNewData(); //test
 
 signals:
     void logChanged(QString);
@@ -42,6 +42,8 @@ private slots:
     void processEvents();
 
 private:
+    void feedExpValues();
+
     void setPointsFromFile();
     void calcToPlot();
     

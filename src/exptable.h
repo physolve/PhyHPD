@@ -5,7 +5,6 @@
 class ExpTable : public QAbstractTableModel
 {
     Q_OBJECT
-    Q_PROPERTY(QString resultStr READ getResultStr NOTIFY resultChanged)
 public:
     enum Column {
         ExpTime,
@@ -29,15 +28,10 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     
     QHash<int, QByteArray> roleNames() const override;
-    
-    QString getResultStr() const;
 
     void appendDataExp(const QVector<qreal> &timeList);
     void appendDataExp(const QVector<double> &dataList, const QString &dataName);
-signals:
-    void resultChanged(QString);
 private:
-    QString resultStr;
     QStringList header;
     unsigned int currentDataCount;
     QMap<QString, QSharedPointer<ExpData>> m_expData;

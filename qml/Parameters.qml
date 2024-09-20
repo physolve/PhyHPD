@@ -3,20 +3,33 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 GroupBox {
+
     title: "Experimental parameters"
     id: parameters
     width: parent.width
     height: parent.height
     SampleLoader {
-        id: sampleLoader
-        source: "file:///C:/Users/mitya/source/repos/MHgrph/build/Debug/data/pseudoSample.json"
+        id: expLoader
+        source: "file:///C:/Users/mitya/source/repos/MHgrph/build/Debug/data/pseudoSampleReport.json"
     }
     function toHHMMSS(secs) { // seems working
         let newDate = new Date(secs * 1000).toISOString().slice(11, 19);
+        // debug if need, Date use 1970 thing
         return newDate
     }
-    function setSampleParameters(sampleName){
-        let sampleParameters = sampleLoader.jsonObject[sampleName]
+    function fromHHMMSS(str){
+        // let date = new Date(str);
+        let a = str.split(':'); // split it at the colons
+        // minutes are worth 60 seconds. Hours are worth 60 minutes.
+        let seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]); 
+        return seconds; //
+    }
+    function setExpParameters(sampleName){
+        let expParameters = expLoader.jsonObject[sampleName]
+        leakStart.text = toHHMMSS(expParameters.leakStart_s)
+        leakEnd.text = toHHMMSS(expParameters.leakEnd_s)
+        steadyStateStart.text = toHHMMSS(expParameters.steadyStateStart_s)
+        let sampleParameters = expParameters.sample
         thickness.text = sampleParameters.thickness_mm
         diameter.text = sampleParameters.diameter_m.toExponential(3)
         sideVolume.text = sampleParameters.sideVolume_m3.toExponential(3)
@@ -29,7 +42,6 @@ GroupBox {
         clip: true
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
         ScrollBar.vertical.policy: ScrollBar.AsNeeded
-
         GridLayout { // move to results
             id: gridExp
             width: parameters.width - 40
@@ -39,7 +51,31 @@ GroupBox {
             flow: GridLayout.LeftToRight
             columns: parameters.width/220
             rowSpacing: 20
-            Layout.preferredWidth: 200 
+            Layout.preferredWidth: 200
+            ComboBox{
+                id: sampleChoose
+                width: 130
+                // height: 40
+                model: expLoader.jsonObject ? Object.keys(expLoader.jsonObject) : 0
+                font.pointSize: 11
+                onActivated: setExpParameters(currentText)
+                Component.onCompleted: currentIndex = -1
+            }
+            Button{
+                id: applySample
+                width: 130
+                text : "Apply parameters"
+                font.pointSize: 11
+                onClicked: {
+                    expCalc.expParametersStruct.thickness = thickness.text
+                    expCalc.expParametersStruct.diameter = diameter.text //.toExponential(3)
+                    expCalc.expParametersStruct.volume = sideVolume.text //.toExponential(3)
+
+                    expCalc.expTimingStruct.leakStart = fromHHMMSS(leakStart.text)
+                    expCalc.expTimingStruct.leakEnd = fromHHMMSS(leakEnd.text)
+                    expCalc.expTimingStruct.steadyStateStart = fromHHMMSS(steadyStateStart.text)
+                }
+            }
             Row{
                 spacing: 10
                 Label{
@@ -52,7 +88,7 @@ GroupBox {
                     id: logStart
                     width: 80
                     text : "00:00:00"
-                    font.pointSize: 10
+                    font.pointSize: 12
                     inputMask: "99:99:99"
                     inputMethodHints: Qt.ImhTime//Qt.ImhDigitsOnly
                     anchors.verticalCenter: parent.verticalCenter
@@ -70,12 +106,13 @@ GroupBox {
                 TextField{
                     id: valveOpen
                     width: 80
-                    text : "00:00:00.000"
-                    font.pointSize: 10
-                    inputMask: "99:99:99.999"
+                    text : "00:00:00"
+                    font.pointSize: 12
+                    inputMask: "99:99:99"
                     inputMethodHints: Qt.ImhTime
                     anchors.verticalCenter: parent.verticalCenter
                     horizontalAlignment: TextInput.AlignHCenter
+                    selectByMouse: true
                 }
             }
             Row{
@@ -89,12 +126,13 @@ GroupBox {
                 TextField{
                     id: valveClose
                     width: 80
-                    text: "00:00:00.000"
-                    font.pointSize: 10
-                    inputMask: "99:99:99.999"
+                    text: "00:00:00"
+                    font.pointSize: 12
+                    inputMask: "99:99:99"
                     inputMethodHints: Qt.ImhTime
                     anchors.verticalCenter: parent.verticalCenter
                     horizontalAlignment: TextInput.AlignHCenter
+                    selectByMouse: true
                 }
             }
             Row{
@@ -108,12 +146,13 @@ GroupBox {
                 TextField{
                     id: leakStart
                     width: 80
-                    text: toHHMMSS(expCalc.leakStart)
+                    text: "00:00:00" //toHHMMSS(expCalc.expTimingStruct.leakStart)
                     font.pointSize: 12
-                    // inputMask: "99:99:99"
+                    inputMask: "99:99:99"
                     // inputMethodHints: Qt.ImhTime//Qt.ImhDigitsOnly
                     anchors.verticalCenter: parent.verticalCenter
                     horizontalAlignment: TextInput.AlignHCenter
+                    selectByMouse: true
                 }
             }
             Row{
@@ -127,10 +166,49 @@ GroupBox {
                 TextField{
                     id: leakEnd
                     width: 80
-                    text : toHHMMSS(expCalc.leakEnd)
+                    text : "00:00:00" //toHHMMSS(expCalc.expTimingStruct.leakEnd)
                     font.pointSize: 12
-                    // inputMask: "99:99:99"
+                    inputMask: "99:99:99"
                     // inputMethodHints: Qt.ImhTime//Qt.ImhDigitsOnly
+                    anchors.verticalCenter: parent.verticalCenter
+                    horizontalAlignment: TextInput.AlignHCenter
+                }
+            }
+            Row{
+                spacing: 10
+                Label{
+                    width: 80
+                    text: "Steady State"
+                    font.pointSize: 12
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                TextField{
+                    id: steadyStateStart
+                    width: 80
+                    text : "00:00:00" //toHHMMSS(expCalc.expTimingStruct.steadyStateStart)
+                    font.pointSize: 12
+                    inputMask: "99:99:99"
+                    // inputMethodHints: Qt.ImhTime//Qt.ImhDigitsOnly
+                    anchors.verticalCenter: parent.verticalCenter
+                    horizontalAlignment: TextInput.AlignHCenter
+                    selectByMouse: true
+                }
+            }
+            Row{
+                spacing: 10
+                Label{
+                    width: 80
+                    text: "Log end"
+                    font.pointSize: 12
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                TextField{
+                    id: logEnd
+                    width: 80
+                    text : "00:00:00"
+                    font.pointSize: 12
+                    inputMask: "99:99:99"
+                    inputMethodHints: Qt.ImhTime//Qt.ImhDigitsOnly
                     anchors.verticalCenter: parent.verticalCenter
                     horizontalAlignment: TextInput.AlignHCenter
                 }
@@ -145,31 +223,9 @@ GroupBox {
             implicitHeight: 200
             flow: GridLayout.LeftToRight
             columns: parameters.width/220
-            rowSpacing: 10
+            rowSpacing: 20
             Layout.preferredWidth: 200 
 
-            ComboBox{
-                id: sampleChoose
-                width: 210
-                height: 40
-                model: sampleLoader.jsonObject ? Object.keys(sampleLoader.jsonObject) : 0
-                font.pointSize: 10
-                onActivated: setSampleParameters(currentText)
-                Component.onCompleted: currentIndex = -1
-            }
-            Button{
-                id: applyParameters
-                width: 130
-                text : "Apply parameters"
-                font.pointSize: 10
-                onClicked: {
-                    let parameters = {}
-                    parameters["sideVolume"] = sideVolume.text //m3
-                    parameters["thickness"] = thickness.text //["micron", "mm", "cm"] -> m or only mm?
-                    parameters["diameter"] = diameter.text; //m
-                    expCalc.setConstants(parameters)
-                }
-            }
             Row{
                 spacing: 10
                 Label{
@@ -178,30 +234,22 @@ GroupBox {
                     font.pointSize: 12
                     anchors.verticalCenter: parent.verticalCenter
                 }
+                //
                 TextField{
                     id: thickness
                     width: 80
                     text : "1.000"
                     font.pointSize: 12
-                    validator: DoubleValidator { bottom: 1e-12; top: 10000; decimals: 2}
+                    validator: DoubleValidator { bottom: 1e-12; top: 10000} //; decimals: 3
                     selectByMouse: true
                     anchors.verticalCenter: parent.verticalCenter
                     horizontalAlignment: TextInput.AlignHCenter
                 }
-                // ComboBox{
-                //     id: thickDimension
-                //     width: 100
-                //     height: 40
-                //     model: ["micron", "mm", "cm"]
-                //     currentIndex: 1
-                //     font.pointSize: 12
-                //     anchors.verticalCenter: parent.verticalCenter
-                // }
-            }
+            }//
             Row{
                 spacing: 10
                 Label{
-                    width: 120
+                    width: 80
                     text: "Diameter, m"
                     font.pointSize: 12
                     anchors.verticalCenter: parent.verticalCenter
@@ -211,7 +259,7 @@ GroupBox {
                     width: 80
                     text : "1.000"
                     font.pointSize: 12
-                    validator: DoubleValidator { bottom: 1e-12; top: 10000; decimals: 2}
+                    validator: DoubleValidator { bottom: 1e-12; top: 10000} //; decimals: 3
                     selectByMouse: true
                     anchors.verticalCenter: parent.verticalCenter
                     horizontalAlignment: TextInput.AlignHCenter
@@ -230,7 +278,7 @@ GroupBox {
                     width: 80
                     text : "1.000"
                     font.pointSize: 12
-                    validator: DoubleValidator { bottom: 1e-12; top: 10000; decimals: 2}
+                    validator: DoubleValidator { bottom: 1e-12; top: 10000} //; decimals: 2
                     selectByMouse: true
                     anchors.verticalCenter: parent.verticalCenter
                     horizontalAlignment: TextInput.AlignHCenter

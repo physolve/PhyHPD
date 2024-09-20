@@ -112,11 +112,6 @@ void MainWindow::processEvents(){
     m_writeLog.writeLine(line);
 }
 
-void MainWindow::preapreExpCalc(){
-    setPointsFromFile();
-    calcToPlot();
-}
-
 void MainWindow::calcToPlot(){
     QVector<qreal> time;
     QVector<double> diffusivity, modeledDiffus, permeation{0}, flux;
@@ -128,32 +123,34 @@ void MainWindow::calcToPlot(){
     m_expDataSet[currentDataSet]->appendDataExp(permeation, "permeation");
 }
 
-void MainWindow::reCalculateDiffusFit(double val){
+void MainWindow::reCalculateDiffusFit(double val){ // only timeLagChanged
     QVector<double> corrModeledDiffus;
     expCalc.reCalculateDiffusFit(corrModeledDiffus, val);
     m_expDataSet[currentDataSet]->appendDataExp(corrModeledDiffus, "modeldiffus");
 }
 
-void MainWindow::reCalculateNewTime(unsigned int steadyStateStart, unsigned int leakStart, unsigned int leakEnd){
-    expCalc.reCalculateNewTime(steadyStateStart, leakStart, leakEnd);
+void MainWindow::reCalculateNewData(){ // anything changed
     calcToPlot();
 } //test
 
 
-void MainWindow::setPointsFromFile(){
+void MainWindow::preapreExpCalc(){
+    setPointsFromFile();
+    calcToPlot();
+}
+
+void MainWindow::setPointsFromFile(){ // log calc function
     QFile expData("data/pseudoData.txt");
 	if (!expData.open(QIODevice::ReadOnly | QIODevice::Text))
 		return;
     QTextStream in(&expData);
     in.readLine(); // skip header
     
-    expCalc.setFileTimes();
-    
     while (!in.atEnd()) {
         const auto &lineList = in.readLine().split('\t');
         double p_p = lineList.at(2).toDouble() * pow(10,5); //pressure, bar to Pa
         double p_s = lineList.at(3).toDouble() * pow(10,5); //vacuum, bar to Pa
-        double absTemp = 273 + 500; // K
+        double absTemp = 273 + 653; // K
         unsigned int t = lineList.at(1).toInt();
         expCalc.addAccumulationPoint(accumulationPoint(p_p,p_s,absTemp,t));
         // unsigned int n = 120;
