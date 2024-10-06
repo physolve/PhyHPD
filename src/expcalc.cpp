@@ -1,22 +1,31 @@
 #include "expcalc.h"
 #include <math.h>
 
-ExpCalc::ExpCalc(QObject *parent) : QObject(parent), m_timeLagVal(0), 
-currentExpParameters{1,1,1}, currentExpTiming{0,0,0}, currentResults{0,0}
+ExpCalc::ExpCalc(QList<QSharedPointer<ControllerData>> dataStorage, QList<QSharedPointer<ExpData>> expStorage, QObject *parent) : QObject(parent),
+currentExpResults{0, 0, 100}, currentExpParameters{1,1,1}, currentExpTiming{0,0,0}, currentExpInfo{"unknown", 0, 0, false}
 {
+    timeData = dataStorage[0];
+    pressure = dataStorage[1];
+    vacuum = dataStorage[2];
+
+    timeExp = expStorage[0];
+    fluxExp = expStorage[1];
+    diffusivityExp = expStorage[2];
+    modeldiffusExp = expStorage[3];
+    permeationExp = expStorage[4];
 }
 
 ExpCalc::~ExpCalc(){
     
 }
 
-void ExpCalc::setExpParametersStruct(expParameters val){
+void ExpCalc::setExpParametersStruct(const expParameters &val){
     currentExpParameters = val;
-    emit expParametersStructChanged();
+    // emit expParametersStructChanged();
 }
-void ExpCalc::setExpTimingStruct(expTiming val){
+void ExpCalc::setExpTimingStruct(const expTiming &val){
     currentExpTiming = val;
-    emit expTimingStructChanged();
+    // emit expTimingStructChanged();
 }
 
 expParameters ExpCalc::getExpParametersStruct() const{
@@ -25,21 +34,60 @@ expParameters ExpCalc::getExpParametersStruct() const{
 expTiming ExpCalc::getExpTimingStruct() const{
     return currentExpTiming;
 }
-// void ExpCalc::setConstants(const QVariantMap &expParametersMap){
-//     setExpParametersStruct(
-//         expParameters{
-//             expParametersMap["sideVolume"].toDouble(), 
-//             expParametersMap["thickness"].toDouble() * pow(10, -3), 
-//             M_PI * pow(expParametersMap["diameter"].toDouble(),2)/4
-//         }
-//     );
-// }
+expResults ExpCalc::getExpResultsStruct() const{
+    return currentExpResults;
+}
+expInfo ExpCalc::getExpInfoStruct() const{
+    return currentExpInfo;
+}
 
-// void ExpCalc::setTimings(const QVariantMap &expTimingsMap){
-//     m_steadyStateStart = expTimingsMap["steadyStateStart"].toUInt(); // extern parameters
-//     m_leakStart = expTimingsMap["leakStart"].toUInt(); // second elapsed when valve open
-//     m_leakEnd = expTimingsMap["leakEnd"].toUInt(); ; // extern parameters
-// }
+void ExpCalc::applyExpFromJSON(){
+    emit expParametersStructChanged();
+    emit expTimingStructChanged();
+    //info changed?
+}
+
+void ExpCalc::startExpTime(bool s){
+    if(s){
+        m_expTime.start();
+        currentExpInfo.m_expStart = timeData->getCurValue();
+    }
+    else{
+        currentExpInfo.m_expEnd = timeData->getCurValue();
+    }
+    currentExpInfo.isExpWorking = s;
+    emit expInfoStructChanged();
+}
+
+bool ExpCalc::setLeakStart(bool s){
+    if(!currentExpInfo.isExpWorking)
+        return false;
+    if(s){
+        currentExpTiming.m_leakStart = timeData->getCurValue();//round(m_expTime.elapsed()/1000);
+        emit expTimingStructChanged();
+    }
+    return true;
+}
+
+bool ExpCalc::setLeakEnd(bool s){
+    if(!currentExpInfo.isExpWorking)
+        return false;
+    if(s){
+        currentExpTiming.m_leakEnd = timeData->getCurValue();//round(m_expTime.elapsed()/1000);
+        emit expTimingStructChanged();
+    }
+    return true;
+}
+
+bool ExpCalc::setSteadyStateStart(bool s){
+    if(!currentExpInfo.isExpWorking)
+        return false;
+    if(s){
+        currentExpTiming.m_steadyStateStart = timeData->getCurValue();//round(m_expTime.elapsed()/1000);
+        emit expTimingStructChanged();
+    }
+    return true;
+}
 
 void ExpCalc::addAccumulationPoint(const accumulationPoint& aP){
     m_accumulation << aP;
@@ -70,20 +118,26 @@ bool ExpCalc::steadyStateTrigger(){ // try to use with pseudo data
     return sv < 0.1;
 }
 
-void ExpCalc::collectValues(QVector<qreal> &time, QVector<double> &flux, QVector<double> &diffusivity, QVector<double> &modeledDiffus, QVector<double> &permeation){
-
+void ExpCalc::collectValues(){
+    QVector<qreal> timeList;
     for(const auto &i : m_accumulation){ // diffusivity times starts from leak
-        time << i.t;
+        // time << i.t;
+        timeList << i.t;
     }
-    calculateFlux(flux, diffusivity, permeation);
-    setTimeLagCalc(timeLagCalc());
-    diffusionFit(modeledDiffus);
+    timeExp->setData(timeList);
+    calculateFlux();
+
+    // setTimeLagCalc(timeLagCalc());
+    currentExpResults.m_timeLagVal = timeLagCalc();
+    emit expResultsStructChanged();
+
+    diffusionFit();
     emit resultChanged();
 }
 
-void ExpCalc::calculateFlux(QVector<double> &flux, QVector<double> &diffusivity, QVector<double> &permeability){
+void ExpCalc::calculateFlux(){
     // to change m_accumulation with averaged values or different time range use argument of this function
-    
+    QVector<double> diffusivity, permeability{0};
     //dn_leak/dt -> moles change during valve open (as very low rate) 
     //  = V/RT*dPleak/dt
     //dn_inf/dt -> moles change during steady state 
@@ -132,7 +186,7 @@ void ExpCalc::calculateFlux(QVector<double> &flux, QVector<double> &diffusivity,
     for(const double &val : averagePermeabilityList){
         sumPermeability += val;
     }
-    currentResults.m_estPermeability = sumPermeability/averagePermeabilityList.count();
+    currentExpResults.m_estPermeability = sumPermeability/averagePermeabilityList.count();
     // split to another function 
     J_0_corr = J_leak.last(); // or not last
     J_inf_corr = J_inf.last(); // or not last! limit to exp end timing
@@ -145,7 +199,9 @@ void ExpCalc::calculateFlux(QVector<double> &flux, QVector<double> &diffusivity,
     }
 
     // argument save
-    flux = J_vals;
+    fluxExp->setData(J_vals);
+    diffusivityExp->setData(diffusivity);
+    permeationExp->setData(permeability);
 }
 
 // this function must be called ether manually or automatically by some trigger
@@ -176,16 +232,19 @@ double ExpCalc::timeLagCalc(){
     return -b/a - currentExpTiming.m_leakEnd; 
 }
 
-void ExpCalc::setTimeLagCalc(const double &val){
-    m_timeLagVal = val;
-    emit timeLagValChanged();
-}
+// void ExpCalc::setTimeLagCalc(const double &val){
+//     m_timeLagVal = val;
+//     emit timeLagValChanged();
+// }
 
-void ExpCalc::diffusionFit(QVector<double> &modeledDiffus){
+void ExpCalc::diffusionFit(){
+    QVector<double> modeledDiffus;
     // function to east squares method fit
     const auto &thickness = currentExpParameters.m_thickness * pow(10,-3); // m
 
-    double initialD = pow(thickness, 2) / (6 * m_timeLagVal);
+
+
+    double initialD = pow(thickness, 2) / (6 * currentExpResults.m_timeLagVal);
     const double &L = thickness;
     
     auto f = [initialD, L] (unsigned int t){
@@ -196,7 +255,7 @@ void ExpCalc::diffusionFit(QVector<double> &modeledDiffus){
         return 1 + 2 * sum;
     };
     // aplly initialD as new value for Diffusivity
-    currentResults.m_estDiffusivity = initialD; // update signal?
+    currentExpResults.m_estDiffusivity = initialD; // update signal?
     // somewhere cause of error 
     // QVector<double> modeledFlux;
     for(const auto& p : m_accumulation){
@@ -206,24 +265,35 @@ void ExpCalc::diffusionFit(QVector<double> &modeledDiffus){
         }
         modeledDiffus << f(p.t-currentExpTiming.m_leakEnd);
     }
+
+    modeldiffusExp->setData(modeledDiffus);
     // set modeledFlux to chart
 }
+
+// void MainWindow::reCalculateNewData(){ // anything changed
+//     expCalc->collectValues();
+//     // calcToPlot();
+// } //test
+
+
 //flux is calculated by two points
 // flux returns in vector
 // flux values is used for obtain permeation
 
-void ExpCalc::reCalculateDiffusFit(QVector<double> &modeledDiffus, const double &corrTimeLagVal){
-    setTimeLagCalc(corrTimeLagVal);
-    diffusionFit(modeledDiffus);
+void ExpCalc::reCalculateDiffusFit(const double &corrTimeLagVal){
+    // setTimeLagCalc(corrTimeLagVal);
+    currentExpResults.m_timeLagVal = corrTimeLagVal;
+    emit expResultsStructChanged();
+    diffusionFit();
     emit resultChanged();
 }
 
-double ExpCalc::timeLagVal() const{
-    return m_timeLagVal;
-}
+// double ExpCalc::timeLagVal() const{
+//     return m_timeLagVal;
+// }
 
 QString ExpCalc::getResultStr() const
 {
-    const QString &text = QString("Diffusivity: %1\n Permeability: %2").arg(currentResults.m_estDiffusivity).arg(currentResults.m_estPermeability);
+    const QString &text = QString("Diffusivity: %1\n Permeability: %2").arg(currentExpResults.m_estDiffusivity).arg(currentExpResults.m_estPermeability);
     return text;
 }

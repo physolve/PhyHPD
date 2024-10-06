@@ -18,6 +18,18 @@ Item {
         xhr.open("GET", url); 
         xhr.send();
     }
+    function save() {
+        const blob = new Blob([JSON.stringify(jsonObject, null, 2)], {
+            type: 'application/json',
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `test.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+    
     Component.onCompleted: {
         load(source)
     }

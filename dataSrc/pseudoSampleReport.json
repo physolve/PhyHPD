@@ -1,0 +1,24 @@
+{
+    "blank":{
+        "sampleName_s": "blank",
+        "leakStart_s": 0, 
+        "leakEnd_s": 0,
+        "steadyStateStart_s": 0,
+        "sample":{
+            "sideVolume_m3": 1,
+            "thickness_mm": 1, 
+            "diameter_m": 1
+        }
+    },
+    "pseudoExp": {
+        "sampleName_s": "pseudoExp",
+        "leakStart_s": 280, 
+        "leakEnd_s": 330,
+        "steadyStateStart_s": 600,
+        "sample": {
+            "sideVolume_m3": 1.43e-04,
+            "thickness_mm": 1.00, 
+            "diameter_m": 16.468e-3
+        }
+    }
+}

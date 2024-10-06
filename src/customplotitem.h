@@ -16,13 +16,10 @@ public:
   void paint(QPainter *painter);
 
   Q_INVOKABLE void initCustomPlot(int index);
-  Q_INVOKABLE void placePointerGraph(const QString &name, QSharedPointer<ControllerData> sensor_ptr); // additional paramters
-  Q_INVOKABLE void placeExpDataGraph(const QString &name, QSharedPointer<ExpData> data_ptr); // additional paramters
+  Q_INVOKABLE void placePointerGraph(QList<QSharedPointer<DataCollection>> sensor_ptr, bool exp); // additional paramters
   Q_INVOKABLE void setCustomLabel(const QString &label); // additional paramters
   Q_INVOKABLE void updatePlot();
   Q_INVOKABLE void resetPos();
-  // QStringList as PROPERTY?
-
 protected:
   void routeMouseEvents(QMouseEvent *event);
   void routeWheelEvents(QWheelEvent *event);
@@ -38,10 +35,11 @@ private:
 
   bool rescalingON;
   QStringList m_plotNames; // as array of str and graph position
+  QSharedPointer<DataCollection> m_time;
   QList<QSharedPointer<DataCollection>> m_sensors;
 
-public slots:
-  void backendData(const QString &name, const QList<double> &x, const QList<double> &y);
+// public slots:
+//   void backendData(const QString &name, const QList<double> &x, const QList<double> &y);
 
 private slots:
   void graphClicked(QCPAbstractPlottable *plottable);

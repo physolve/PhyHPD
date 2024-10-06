@@ -9,23 +9,23 @@ Rectangle {
     height: 760
     color: "transparent"
 
-    function setPres(presValue){
-        slider1.value = presValue
-    }
-    function setVacuum(vacValue){
-        slider2.value = vacValue
-    }
-    function setTime(timeValue){
-        console.log(timeValue)
-    }
+    // function setPres(presValue){
+    //     slider1.value = presValue
+    // }
+    // function setVacuum(vacValue){
+    //     slider2.value = vacValue
+    // }
+    // function setTime(timeValue){
+    //     console.log(timeValue)
+    // }
 
-    Connections{
-        target: dataModel
-        function onDataChanged(topLeft, bottomRight, roles){
-            setPres(dataModel.data(dataModel.index(bottomRight.row, 0), 258)) //fine for now
-            setVacuum(dataModel.data(dataModel.index(bottomRight.row, 0), 259)) //fine for now
-        }
-    }
+    // Connections{
+    //     target: dataModel
+    //     function onDataChanged(topLeft, bottomRight, roles){
+    //         setPres(dataModel.data(dataModel.index(bottomRight.row, 0), 258)) //fine for now
+    //         setVacuum(dataModel.data(dataModel.index(bottomRight.row, 0), 259)) //fine for now
+    //     }
+    // }
 
     // Connections {
     //     target: dataModel
@@ -177,7 +177,7 @@ Rectangle {
             startAngle: 40
             //Layout.fillWidth: false
             trackWidth: 10
-            value: 5
+            value: pressureBack ? pressureBack.pressureVal : 0
             maxValue: 10
             endAngle: 320
 
@@ -229,7 +229,7 @@ Rectangle {
             startAngle: 40
             //Layout.fillWidth: false
             trackWidth: 10
-            value: 1.5
+            value: pressureBack ? pressureBack.vacuumVal : 0
             maxValue: 2
             endAngle: 320
 

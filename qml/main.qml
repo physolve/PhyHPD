@@ -65,7 +65,7 @@ ApplicationWindow {
                 currentIndex: barMain.currentIndex
                 Item{
                     //Layout.fillHeight: true
-                    Graphs{
+                    Charts{
                     }
                 }   
                 Item{

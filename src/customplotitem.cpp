@@ -4,6 +4,7 @@
 
 CustomPlotItem::CustomPlotItem(QQuickItem *parent)
     : QQuickPaintedItem(parent), m_CustomPlot(nullptr), rescalingON(true) {
+
     setFlag(QQuickItem::ItemHasContents, true);
     setAcceptedMouseButtons(Qt::AllButtons);
 
@@ -12,6 +13,7 @@ CustomPlotItem::CustomPlotItem(QQuickItem *parent)
     connect(this, &QQuickPaintedItem::heightChanged, this,
             &CustomPlotItem::updateCustomPlotSize);
     qDebug() << "CustomPlotItem Created";
+    initCustomPlot(0);
 }
 
 CustomPlotItem::~CustomPlotItem() {
@@ -28,7 +30,7 @@ void CustomPlotItem::initCustomPlot(int index) {
         connect( m_CustomPlot, &QCustomPlot::destroyed, this, [=](){ qDebug() << QString(" QCustomPlot (%1) pointer is destroyed ").arg(index); });
         updateCustomPlotSize();
 
-        m_CustomPlot->setOpenGl(true);
+        //m_CustomPlot->setOpenGl(true);
         m_CustomPlot->setNoAntialiasingOnDrag(true);
         // m_CustomPlot->layer(0)->setMode(QCPLayer::LayerMode::lmBuffered);
         QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
@@ -92,49 +94,36 @@ void CustomPlotItem::initCustomPlot(int index) {
     //m_CustomPlot->replot();
 }
 
-void CustomPlotItem::placePointerGraph(const QString &name, QSharedPointer<ControllerData> sensor_ptr){
-    if(sensor_ptr->m_name != name){
-        qDebug() << "You ruined " << name << " sensor in placePointerGraph"; 
-        return;
+void CustomPlotItem::placePointerGraph(QList<QSharedPointer<DataCollection>> sensor_ptr, bool exp) {
+    // if(sensor_ptr->m_name != name){
+    //     qDebug() << "You ruined " << name << " sensor in placePointerGraph"; 
+    //     return;
+    // }
+    m_time = sensor_ptr[0];
+    sensor_ptr.removeFirst();
+    m_sensors = sensor_ptr;
+    
+    for(auto sensor : m_sensors){
+        qDebug() << "add " << sensor->m_name << " to plot " << m_index;
+        m_CustomPlot->addGraph();
+        if(exp){
+            QStringList lineColors = {"#a8c8a6", "#6d8d8a", "#655057", "#cb8175", "#e2a97e", "#f0cf8e", "#f6edcd"};
+            auto pen = QPen(QColor(lineColors.value(m_plotNames.count())), 1.5);
+            m_CustomPlot->graph()->setPen(pen);
+            m_CustomPlot->graph()->setLineStyle(QCPGraph::LineStyle::lsLine);
+            m_CustomPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, pen, QBrush(Qt::white), 7));
+        }
+        else{
+            QStringList lineColors = {"#cb8175", "#e2a97e", "#f0cf8e", "#f6edcd", "#a8c8a6", "#6d8d8a", "#655057" };
+            auto pen = QPen(QColor(lineColors.value(m_plotNames.count())), 1.5);
+            m_CustomPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, pen, QBrush(Qt::white), 9));
+            m_CustomPlot->graph()->setPen(QPen(QColor(120, 120, 120), 2));
+            
+        }
+        m_CustomPlot->graph()->setAdaptiveSampling(true);
+        m_CustomPlot->graph()->setName(sensor->m_name);
+        m_plotNames << sensor->m_name;
     }
-    qDebug() << "add " << name << " to plot " << m_index;
-    m_sensors.append(sensor_ptr);
-    m_CustomPlot->addGraph();
-    QStringList lineColors = {"#cb8175", "#e2a97e", "#f0cf8e", "#f6edcd", "#a8c8a6", "#6d8d8a", "#655057" };
-    
-    auto pen = QPen(QColor(lineColors.value(m_plotNames.count())), 1.5);
-    
-    m_CustomPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, pen, QBrush(Qt::white), 9));
-    m_CustomPlot->graph()->setPen(QPen(QColor(120, 120, 120), 2));
-    m_CustomPlot->graph()->setAdaptiveSampling(true);
-    m_CustomPlot->graph()->setName(name);
-    m_plotNames << name;
-
-}
-
-void CustomPlotItem::placeExpDataGraph(const QString &name, QSharedPointer<ExpData> data_ptr){
-    if(data_ptr->m_name != name){
-        qDebug() << "You ruined " << name << " sensor in placeExpDataGraph"; 
-        return;
-    }
-    qDebug() << "add " << name << " to plot " << m_index;
-    m_sensors.append(data_ptr);
-    m_CustomPlot->addGraph();
-    QStringList lineColors = {"#a8c8a6", "#6d8d8a", "#655057", "#cb8175", "#e2a97e", "#f0cf8e", "#f6edcd"};
-    
-    auto pen = QPen(QColor(lineColors.value(m_plotNames.count())), 1.5);
-    // scatter style
-    // m_CustomPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, pen, QBrush(Qt::white), 9));
-    // m_CustomPlot->graph()->setPen(QPen(QColor(120, 120, 120), 2));
-    // line style
-    m_CustomPlot->graph()->setPen(pen);
-    m_CustomPlot->graph()->setLineStyle(QCPGraph::LineStyle::lsLine);
-    m_CustomPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, pen, QBrush(Qt::white), 7));
-
-    m_CustomPlot->graph()->setAdaptiveSampling(true);
-    m_CustomPlot->graph()->setName(name);
-    m_plotNames << name;
-
 }
 
 void CustomPlotItem::setCustomLabel(const QString &label){ // remade it from DataCollection pointer?
@@ -185,11 +174,12 @@ void CustomPlotItem::updatePlot(){
     }
     // static double lastPointKey = 0; // making problems being static
     qreal lastPointKey = 0;
+
     for(auto i = 0; i < m_CustomPlot->graphCount(); ++i){
-        m_CustomPlot->graph(i)->setData(m_sensors[i]->getTime(), m_sensors[i]->getValue());
-        if(lastPointKey < m_sensors[i]->getCurTime())
-            lastPointKey = m_sensors[i]->getCurTime();
+        m_CustomPlot->graph(i)->setData(m_time->getLastToChart(), m_sensors[i]->getLastToChart());
     }
+    if(lastPointKey < m_time->getCurValue())
+        lastPointKey = m_time->getCurValue();
     if(rescalingON){
         m_CustomPlot->xAxis->setRange(lastPointKey, 10, Qt::AlignRight); // means there a 10 sec
         m_CustomPlot->yAxis->rescale();
@@ -199,30 +189,30 @@ void CustomPlotItem::updatePlot(){
     m_CustomPlot->replot();
 }
 
-void CustomPlotItem::backendData(const QString &name, const QList<double> &x, const QList<double> &y){
+// void CustomPlotItem::backendData(const QString &name, const QList<double> &x, const QList<double> &y){
 
-    if(m_sensors.isEmpty()){
-        return;
-    }
+//     if(m_sensors.isEmpty()){
+//         return;
+//     }
     
-    qreal lastPointKey = 0;
+//     qreal lastPointKey = 0;
 
-    auto index = m_plotNames.indexOf(name);
+//     auto index = m_plotNames.indexOf(name);
 
-    for(auto i = 0; i < m_CustomPlot->graphCount(); ++i){
-        m_CustomPlot->graph(i)->setData(m_sensors[i]->getTime(), m_sensors[i]->getValue());
-        if(lastPointKey < m_sensors[i]->getCurTime())
-            lastPointKey = m_sensors[i]->getCurTime();
-    }
+//     for(auto i = 0; i < m_CustomPlot->graphCount(); ++i){
+//         m_CustomPlot->graph(i)->setData(m_sensors[i]->getTime(), m_sensors[i]->getValue());
+//         if(lastPointKey < m_sensors[i]->getCurTime())
+//             lastPointKey = m_sensors[i]->getCurTime();
+//     }
 
-    if(rescalingON){
-        m_CustomPlot->xAxis->setRange(lastPointKey, 10, Qt::AlignRight); // means there a 10 sec
-        m_CustomPlot->yAxis->rescale();
-        // if(m_sensors[0]->getValue().last() != 0)
-        //     m_CustomPlot->yAxis->scaleRange(1.1);
-    }
-    m_CustomPlot->replot();
-}
+//     if(rescalingON){
+//         m_CustomPlot->xAxis->setRange(lastPointKey, 10, Qt::AlignRight); // means there a 10 sec
+//         m_CustomPlot->yAxis->rescale();
+//         // if(m_sensors[0]->getValue().last() != 0)
+//         //     m_CustomPlot->yAxis->scaleRange(1.1);
+//     }
+//     m_CustomPlot->replot();
+// }
 
 void CustomPlotItem::graphClicked(QCPAbstractPlottable *plottable) {
     qDebug() << Q_FUNC_INFO

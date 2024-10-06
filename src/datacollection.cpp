@@ -3,7 +3,6 @@
 
 DataCollection::DataCollection(const QString &name) : m_name(name)
 {
-    m_x.append(0);
     m_y.append(0);
 }
 
@@ -11,18 +10,11 @@ DataCollection::~DataCollection(){
 
 }
 void DataCollection::clearPoints(){
-    m_x.clear();
     m_y.clear();
-    m_x << 0;
-    m_x << 0;
+    m_y << 0;
 
 }
-void DataCollection::addPoint(const qreal &val_x, const double &val_y){
-    if(m_x.count() > 120){
-        m_x.removeFirst();
-        m_y.removeFirst();
-    }
-    m_x.append(val_x);
+void DataCollection::addPoint(const double &val_y){
     m_y.append(val_y);        
 }
 
@@ -30,17 +22,16 @@ const double DataCollection::filterData(const double &voltage){
     return voltage;
 }
 
-QVector<qreal> DataCollection::getTime() const {
-    return m_x;
-}
-
 QVector<double> DataCollection::getValue() const {
     return m_y;
 }
 
-qreal DataCollection::getCurTime() const{
-    return m_x.last();
-};
+QVector<double> DataCollection::getLastToChart() const {
+    if(m_y.count() > 120)
+        return m_y.last(120);
+    return m_y;
+}
+
 double DataCollection::getCurValue() const{
     return m_y.last();
 }
@@ -55,12 +46,12 @@ const double ControllerData::filterData(const double &voltage){
     return point;
 }
 
+
 ExpData::ExpData(const QString &name, const int &setId) : DataCollection(name), m_setId(setId)
 {
 }
 
-void ExpData::setData(const QVector<qreal> &val_x, const QVector<double> &val_y){
-    m_x = val_x;
+void ExpData::setData(const QVector<double> &val_y){
     m_y = val_y;
 }
 

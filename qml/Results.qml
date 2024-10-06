@@ -11,7 +11,7 @@ GroupBox {
         anchors.fill: parent
         anchors.margins: 10
         contentWidth: gridResult.width + 10
-        contentHeight: gridResult.height + calcCol.height + 10  // Same
+        contentHeight: gridResult.height + 10  //+ calcCol.height Same
         clip: true
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
         ScrollBar.vertical.policy: ScrollBar.AsNeeded
@@ -54,7 +54,7 @@ GroupBox {
                 TextField{
                     id: timeLagVal
                     width: 80
-                    text : expCalc.timeLagVal.toFixed(3) // format decimals
+                    text : expCalc ? expCalc.expResultsStruct.timeLagVal.toFixed(3) : "" // format decimals
                     font.pointSize: 12
                     anchors.verticalCenter: parent.verticalCenter
                     horizontalAlignment: TextInput.AlignHCenter
@@ -72,26 +72,28 @@ GroupBox {
                     text : "Apply new time lag"
                     font.pointSize: 11
                     onClicked: {
-                        backend.reCalculateDiffusFit(resultTimeLagSlider.value)
+                        expCalc.reCalculateDiffusFit(resultTimeLagSlider.value) //change to corrTimeLagVal
                     }
                 }
                 Slider{
                     id: resultTimeLagSlider
                     width: 200
-                    from: 0
-                    value: 25
-                    to: 10000
+                    property double timeLag: expCalc ? expCalc.expResultsStruct.timeLagVal : 1
+                    from: (timeLag*0.1).toFixed(2)//0
+                    to: (timeLag*2).toFixed(2)//10000
+                    value: timeLag//25
                     // stepSize: 10
                     // snapMode: Slider.SnapOnRelease
-                    Connections {
-                        target: expCalc
-                        function onTimeLagValChanged() {
-                            resultTimeLagSlider.from = (expCalc.timeLagVal*0.8).toFixed(2)
-                            resultTimeLagSlider.to = (expCalc.timeLagVal*1.2).toFixed(2)
-                            resultTimeLagSlider.value = expCalc.timeLagVal
-                            // resultTimeLagSlider.stepSize = (resultTimeLagSlider.value*0.02).toFixed(3)
-                        }
-                    }
+                    // Connections {
+                    //     target: expCalc
+                    //     function onTimeLagValChanged() {
+                    //         let val = expCalc.expResultsStruct.timeLagVal
+                    //         resultTimeLagSlider.from = (val*0.8).toFixed(2)
+                    //         resultTimeLagSlider.to = (val*1.2).toFixed(2)
+                    //         resultTimeLagSlider.value = val
+                    //         // resultTimeLagSlider.stepSize = (resultTimeLagSlider.value*0.02).toFixed(3)
+                    //     }
+                    // }
                 }
                 TextField{
                     id: corrTimeLagVal
@@ -103,6 +105,79 @@ GroupBox {
                     validator: DoubleValidator { bottom: 1e-12; decimals: 3} //is it necessary? 
                     selectByMouse: true
                 }
+            }
+            Row{
+                spacing: 10
+                Layout.columnSpan: 2
+                Button{
+                    width: 120
+                    text: "Calculate"
+                    font.pointSize: 11
+                }
+                Button{
+                    width: 150
+                    text: "Test set constants"
+                    font.pointSize: 11
+                    onClicked: backend.preapreExpCalc()
+                }
+            }
+            Row{
+                spacing: 10
+                Layout.columnSpan: 2
+                TextField{
+                    id: runName
+                    // property int curRunCnt:  flowToVolume ? flowToVolume.runCnt : 0
+                    text: "Запуск #" //+ curRunCnt
+                    font.pointSize: 11
+                    // anchors.verticalCenter: parent.verticalCenter
+                    horizontalAlignment: TextInput.AlignHCenter
+                }
+                Button {
+                    // id: startExp
+                    checkable: true
+                    text: checked ? qsTr("Exp working") : qsTr("Exp waiting")  
+                    font.pointSize: 11
+                    onToggled: backend.beginExp(runName.text, checked)
+                }
+            }
+            Row{
+                spacing: 10
+                Button{
+                    width: 120
+                    text: "Set Leak Start"
+                    checkable: true
+                    font.pointSize: 11
+                    onClicked: checked = expCalc.setLeakStart(checked)
+                }
+                Button{
+                    width: 120
+                    text: "Set Leak End"
+                    checkable: true
+                    font.pointSize: 11
+                    onClicked: checked = expCalc.setLeakEnd(checked)
+                }
+            }
+            Row{
+                spacing: 10
+                Button{
+                    width: 150
+                    text: "Set Steady State"
+                    checkable: true
+                    font.pointSize: 11
+                    onClicked: checked = expCalc.setSteadyStateStart(checked)
+                }
+                Button{
+                    width: 150
+                    text: "Pass accum points"
+                    font.pointSize: 11
+                    // onClicked: backend.preapreExpCalc()
+                }
+            }
+            TextArea {
+                id: resultText
+                //Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+                placeholderText: qsTr("Enter description")
+                text: expCalc ? expCalc.resultStr : ""
             }
             Row{
                 spacing: 10
@@ -147,19 +222,8 @@ GroupBox {
                     font.pointSize: 11
                 }
             }
-        }
-        ColumnLayout{
-            id: calcCol
-            width: base.width - 40
-            anchors.top: gridResult.bottom
-            anchors.left: parent.left
-            anchors.topMargin: 10
-            implicitHeight: 200
-            spacing: 10
-            //Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-            //Layout.fillWidth: true;
-            //Layout.fillHeight: false;
             Row{
+                Layout.columnSpan: 2
                 spacing: 10
                 Label{
                     width: 100
@@ -226,97 +290,91 @@ GroupBox {
                     // }
                 }
             }
-            Row{
-                spacing: 10
-                Button{
-                    width: 120
-                    text: "Calculate"
-                    font.pointSize: 11
-                }
-                Button{
-                    width: 150
-                    text: "Test set constants"
-                    font.pointSize: 11
-                    onClicked: backend.preapreExpCalc()
-                }
-            }
-            TextArea {
-                id: resultText
-                //Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
-                placeholderText: qsTr("Enter description")
-                text: expCalc.resultStr
-            }
-            TableView {
-                id: tableView
-                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
-                implicitWidth: 500
-                height: 250
-                columnWidthProvider: function (column) { return 140; }
-                rowHeightProvider: function (column) { return 60; }
-                leftMargin: rowsHeader.implicitWidth
-                topMargin: columnsHeader.implicitHeight
-                model: table_model
-                ScrollBar.horizontal: ScrollBar{}
-                ScrollBar.vertical: ScrollBar{}
-                clip: true
-                delegate: Rectangle {
-                    Text {
-                        text: display
-                        anchors.fill: parent
-                        anchors.margins: 10
-                        color: 'black'
-                        font.pixelSize: 15
-                        verticalAlignment: Text.AlignVCenter
-                    }
-                }
-                Rectangle { // mask the headers
-                    z: 3
-                    color: "#222222"
-                    y: tableView.contentY
-                    x: tableView.contentX
-                    width: tableView.leftMargin
-                    height: tableView.topMargin
-                }
-                Row {
-                    id: columnsHeader
-                    y: tableView.contentY
-                    z: 2
-                    Repeater {
-                        model: tableView.columns > 0 ? tableView.columns : 1
-                        Label {
-                            width: tableView.columnWidthProvider(modelData)
-                            height: 35
-                            text: table_model.headerData(modelData, Qt.Horizontal)
-                            color: '#aaaaaa'
-                            font.pixelSize: 15
-                            padding: 10
-                            verticalAlignment: Text.AlignVCenter
-
-                            background: Rectangle { color: "#333333" }
-                        }
-                    }
-                }
-                Column {
-                    id: rowsHeader
-                    x: tableView.contentX
-                    z: 2
-                    Repeater {
-                        model: tableView.rows > 0 ? tableView.rows : 1
-                        Label {
-                            width: 60
-                            height: tableView.rowHeightProvider(modelData)
-                            text: table_model.headerData(modelData, Qt.Vertical)
-                            color: '#aaaaaa'
-                            font.pixelSize: 15
-                            padding: 10
-                            verticalAlignment: Text.AlignVCenter
-                            background: Rectangle { color: "#333333" }
-                        }
-                    }
-                }
-                ScrollIndicator.horizontal: ScrollIndicator { }
-                ScrollIndicator.vertical: ScrollIndicator { }
-            }
         }
+
+        // ColumnLayout{
+        //     id: calcCol
+        //     width: base.width - 40
+        //     anchors.top: gridResult.bottom
+        //     anchors.left: parent.left
+        //     anchors.topMargin: 10
+        //     implicitHeight: 200
+        //     spacing: 10
+            //Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+            //Layout.fillWidth: true;
+            //Layout.fillHeight: false;
+            
+            // TableView {
+            //     id: tableView
+            //     Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+            //     implicitWidth: 500
+            //     height: 250
+            //     columnWidthProvider: function (column) { return 140; }
+            //     rowHeightProvider: function (column) { return 60; }
+            //     leftMargin: rowsHeader.implicitWidth
+            //     topMargin: columnsHeader.implicitHeight
+            //     model: table_model
+            //     ScrollBar.horizontal: ScrollBar{}
+            //     ScrollBar.vertical: ScrollBar{}
+            //     clip: true
+            //     delegate: Rectangle {
+            //         Text {
+            //             text: display
+            //             anchors.fill: parent
+            //             anchors.margins: 10
+            //             color: 'black'
+            //             font.pixelSize: 15
+            //             verticalAlignment: Text.AlignVCenter
+            //         }
+            //     }
+            //     Rectangle { // mask the headers
+            //         z: 3
+            //         color: "#222222"
+            //         y: tableView.contentY
+            //         x: tableView.contentX
+            //         width: tableView.leftMargin
+            //         height: tableView.topMargin
+            //     }
+            //     Row {
+            //         id: columnsHeader
+            //         y: tableView.contentY
+            //         z: 2
+            //         Repeater {
+            //             model: tableView.columns > 0 ? tableView.columns : 1
+            //             Label {
+            //                 width: tableView.columnWidthProvider(modelData)
+            //                 height: 35
+            //                 text: table_model.headerData(modelData, Qt.Horizontal)
+            //                 color: '#aaaaaa'
+            //                 font.pixelSize: 15
+            //                 padding: 10
+            //                 verticalAlignment: Text.AlignVCenter
+
+            //                 background: Rectangle { color: "#333333" }
+            //             }
+            //         }
+            //     }
+            //     Column {
+            //         id: rowsHeader
+            //         x: tableView.contentX
+            //         z: 2
+            //         Repeater {
+            //             model: tableView.rows > 0 ? tableView.rows : 1
+            //             Label {
+            //                 width: 60
+            //                 height: tableView.rowHeightProvider(modelData)
+            //                 text: table_model.headerData(modelData, Qt.Vertical)
+            //                 color: '#aaaaaa'
+            //                 font.pixelSize: 15
+            //                 padding: 10
+            //                 verticalAlignment: Text.AlignVCenter
+            //                 background: Rectangle { color: "#333333" }
+            //             }
+            //         }
+            //     }
+            //     ScrollIndicator.horizontal: ScrollIndicator { }
+            //     ScrollIndicator.vertical: ScrollIndicator { }
+            // }
+        // }
     }
 }

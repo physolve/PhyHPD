@@ -5,7 +5,7 @@ int main(int argc, char *argv[]) {
     QCoreApplication::setApplicationVersion("0.0.1");
     QCoreApplication::setOrganizationName(QStringLiteral("Tomsk Polytechnic University"));
     QCoreApplication::setOrganizationDomain(QStringLiteral("tpu.ru"));
-    qputenv("QT_FONT_DPI", QByteArray("156")); //128
+    qputenv("QT_FONT_DPI", QByteArray("96")); //156
     qputenv("QML_XHR_ALLOW_FILE_READ", QString("1").toUtf8());
     MainWindow app(argc, argv);
     return app.exec();

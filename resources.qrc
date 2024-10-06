@@ -3,8 +3,10 @@
         <file>qml/main.qml</file>
         <file>qml/DataWindow.qml</file>
         <file>qml/SettingsDialog.qml</file>
-        <file>qml/Graphs.qml</file>
-        <file>qml/ChartExpData.qml</file>
+        
+        <file>qml/Charts.qml</file>
+        <file>qml/CustomChart.qml</file>
+        
         <file>qml/Experimental.qml</file>
         <file>qml/Parameters.qml</file>
         <file>qml/Results.qml</file>
@@ -13,5 +15,6 @@
         <file>qml/mnemo/CircularSlider.qml</file>
         <file>qml/images/scheme.jpg</file>
         <file>qml/images/scheme_1.jpg</file>
+        <file>dataSrc/pseudoSampleReport.json</file>
     </qresource>
 </RCC>

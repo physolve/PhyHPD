@@ -99,9 +99,13 @@ void Controller::setLogText(const QString &text)
     }
 }
 
-PressureController::PressureController(const SettingsDialog::Settings &settings, QObject *parent) : 
-    Controller(settings,parent), query("#01\r"), currentPressure(0), currentVacuum(0)
+PressureController::PressureController(const SettingsDialog::Settings &settings, QList<QSharedPointer<ControllerData>> dataStorage, QObject *parent) : 
+    Controller(settings,parent), query("#01\r")//, currentPressure(0), currentVacuum(0)
 {
+    m_programmTime.start();
+    timeData = dataStorage[0];
+    pressure = dataStorage[1];
+    vacuum = dataStorage[2];
 }
 // #010\r to read only first channel, #000\r to read all channels, but what is syntax? 
 void PressureController::writeData(){
@@ -141,7 +145,7 @@ void PressureController::readData(){
             shuttingOff();
         }
     }
-    currentPressure = point_pr;
+    // currentPressure = point_pr;
     auto point_vac = 0.0;
     if(voltageVacuum != 0 && ok){
         point_vac = filterData_vac(voltageVacuum);
@@ -153,7 +157,15 @@ void PressureController::readData(){
             shuttingOff();
         }
     }
-    currentVacuum = point_vac;
+    // currentVacuum = point_vac;
+
+    const auto &c_time = m_programmTime.elapsed()/1000;
+    timeData->addPoint(c_time);
+    pressure->addPoint(point_pr);
+    // emit pressureValChanged();
+    vacuum->addPoint(point_vac);
+    // emit vacuumValChanged();
+    emit pressureChanged();
 }
 
 const double PressureController::filterData_pr(double voltage){
@@ -166,15 +178,22 @@ const double PressureController::filterData_vac(double voltage){
     return point;
 }
 
-QMap<QString, double> PressureController::getLastChanged(){
-    QMap<QString, double> points;
-    points["pressure"] = currentPressure;
-    points["vacuum"] = currentVacuum;
-    return points;
-}
+// QMap<QString, double> PressureController::getLastChanged(){
+//     QMap<QString, double> points;
+//     points["pressure"] = currentPressure;
+//     points["vacuum"] = currentVacuum;
+//     return points;
+// }
 
 void PressureController::stopReading(){
     m_timer->stop();
-    currentPressure = 0;
-    currentVacuum = 0;
+    // currentPressure = 0;
+    // currentVacuum = 0;
+}
+
+double PressureController::pressureVal() const{
+    return pressure->getCurValue();
+}
+double PressureController::vacuumVal() const{
+    return vacuum->getCurValue();
 }
