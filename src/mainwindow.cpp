@@ -178,7 +178,7 @@ void MainWindow::preapreExpCalc(){
 }
 
 bool MainWindow::setPointsFromFile(){ // log calc function
-    QFile expData("data/pseudoData.txt");
+    QFile expData("pseudoData.txt");
 	if (!expData.open(QIODevice::ReadOnly | QIODevice::Text))
         return false;
     QTextStream in(&expData);

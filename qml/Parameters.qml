@@ -98,7 +98,7 @@ GroupBox {
                 }
                 TextField{
                     id: logStart
-                    width: 80
+                    width: 100
                     property int logStartVal: expCalc ? expCalc.expInfoStruct.expStart : 0
                     text: toHHMMSS(logStartVal)
                     font.pointSize: 12
@@ -159,7 +159,7 @@ GroupBox {
                 TextField{
                     // id: leakStart
                     id: textLeakStart
-                    width: 80
+                    width: 100
                     property int leakStartVal: expCalc ? expCalc.expTimingStruct.leakStart : 0
                     text: toHHMMSS(leakStartVal)
                     font.pointSize: 12
@@ -181,7 +181,7 @@ GroupBox {
                 TextField{
                     // id: leakEnd
                     id: textLeakEnd
-                    width: 80
+                    width: 100
                     property int leakEndVal: expCalc ? expCalc.expTimingStruct.leakEnd : 0
                     text: expCalc ? toHHMMSS(leakEndVal) : "00:00:00"
                     font.pointSize: 12
@@ -202,7 +202,7 @@ GroupBox {
                 TextField{
                     // id: steadyStateStart
                     id: textSteadyStateStart
-                    width: 80
+                    width: 100
                     text: expCalc ? toHHMMSS(expCalc.expTimingStruct.steadyStateStart) : "00:00:00" //toHHMMSS(expCalc.expTimingStruct.steadyStateStart)
                     font.pointSize: 12
                     inputMask: "99:99:99"
@@ -222,7 +222,7 @@ GroupBox {
                 }
                 TextField{
                     id: logEnd
-                    width: 80
+                    width: 100
                     property int logEndVal: expCalc ? expCalc.expInfoStruct.expEnd : 0
                     text: toHHMMSS(logEndVal)
                     font.pointSize: 12
@@ -243,7 +243,7 @@ GroupBox {
             }
             TextField{
                 id: sampleName
-                width: 80
+                width: 100
                 text: ""
                 font.pointSize: 12
                 inputMethodHints: Qt.ImhTime
@@ -283,7 +283,7 @@ GroupBox {
                 //
                 TextField{
                     id: textThickness
-                    width: 80
+                    width: 100
                     text: expCalc ? expCalc.expParametersStruct.thickness : 0
                     font.pointSize: 12
                     validator: DoubleValidator { bottom: 1e-12; top: 10000} //; decimals: 3
@@ -302,7 +302,7 @@ GroupBox {
                 }
                 TextField{
                     id: textDiameter
-                    width: 80
+                    width: 100
                     text: expCalc ? expCalc.expParametersStruct.diameter.toExponential(3) : 0
                     font.pointSize: 12
                     validator: DoubleValidator { bottom: 1e-12; top: 10000} //; decimals: 3
@@ -321,7 +321,7 @@ GroupBox {
                 }
                 TextField{
                     id: textVolume
-                    width: 80
+                    width: 100
                     text: expCalc ? expCalc.expParametersStruct.volume.toExponential(3) : 0
                     font.pointSize: 12
                     validator: DoubleValidator { bottom: 1e-12; top: 10000} //; decimals: 2

@@ -53,7 +53,7 @@ GroupBox {
                 }
                 TextField{
                     id: timeLagVal
-                    width: 80
+                    width: 100
                     text : expCalc ? expCalc.expResultsStruct.timeLagVal.toFixed(3) : "" // format decimals
                     font.pointSize: 12
                     anchors.verticalCenter: parent.verticalCenter
@@ -97,7 +97,7 @@ GroupBox {
                 }
                 TextField{
                     id: corrTimeLagVal
-                    width: 80
+                    width: 100
                     text : resultTimeLagSlider.value.toFixed(3) // format decimals
                     font.pointSize: 12
                     anchors.verticalCenter: parent.verticalCenter
@@ -188,7 +188,7 @@ GroupBox {
                 }
                 TextField{
                     id: logPath
-                    width: 80
+                    width: 100
                     text : ""
                     horizontalAlignment: TextInput.AlignHCenter
                 }
@@ -202,7 +202,7 @@ GroupBox {
                 }
                 TextField{
                     id: spectrumPath
-                    width: 80
+                    width: 100
                     text : ""
                     horizontalAlignment: TextInput.AlignHCenter
                 }
@@ -233,7 +233,7 @@ GroupBox {
                 }
                 TextField{
                     id: curSeconds
-                    width: 40
+                    width: 60
                     text : avgSlider.value
                     horizontalAlignment: TextInput.AlignHCenter
                 }
