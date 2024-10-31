@@ -7,12 +7,9 @@
 #include "controller.h"
 #include "writelogfile.h"
 // #include "datamodel.h"
-
 #include "expcalc.h"
 // #include "exptable.h"
-
 #include "chartmodel.h"
-
 #include "mnemostate.h"
 
 class MainWindow : public QApplication
@@ -76,7 +73,7 @@ private:
     ExpCalc* expCalc;
 
     ChartModel* chartModel;
-
+    
     MnemoState m_mnemoState;
     QQmlApplicationEngine m_engine;
 };

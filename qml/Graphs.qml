@@ -24,7 +24,7 @@ Item{
                     for(const sensorName of sensorsList){
                         placePointerGraph(sensorName, dataModel.getSensor(sensorName))
                     }
-                    setCustomLabel(label)
+                    //setCustomLabel(label)
                 }
                 Component.onDestruction: testJSString(0)
                 function testJSString(num) {

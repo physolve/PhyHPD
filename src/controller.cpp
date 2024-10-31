@@ -158,7 +158,7 @@ void PressureController::readData(){
         }
     }
     // currentVacuum = point_vac;
-
+    
     const auto &c_time = m_programmTime.elapsed()/1000;
     timeData->addPoint(c_time);
     pressure->addPoint(point_pr);

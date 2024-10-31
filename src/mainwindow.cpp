@@ -8,10 +8,10 @@ MainWindow::MainWindow(int &argc, char **argv)
     : QApplication(argc, argv), m_settings(new SettingsDialog), m_writeLog(), m_mnemoState() //m_logTimer(new QTimer),
 {
     QQuickStyle::setStyle("Material");
+    // QQuickStyle::setStyle("Fusion");
     QString applicationName = "MHgrph";
     
     m_engine.addImportPath(":/");
-
 
     const QUrl url(QString("qrc:/%1/qml/main.qml").arg(applicationName));
     QObject::connect(
@@ -31,7 +31,6 @@ MainWindow::MainWindow(int &argc, char **argv)
 
     initChartModel();
     //initDataSet(); will be database
-    
     m_engine.load(url);
 
     //connect(m_logTimer, &QTimer::timeout, this, &MainWindow::processEvents);
@@ -178,7 +177,7 @@ void MainWindow::preapreExpCalc(){
 }
 
 bool MainWindow::setPointsFromFile(){ // log calc function
-    QFile expData("pseudoData.txt");
+    QFile expData("data/pseudoData.txt");
 	if (!expData.open(QIODevice::ReadOnly | QIODevice::Text))
         return false;
     QTextStream in(&expData);

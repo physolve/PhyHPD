@@ -11,9 +11,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 20)
 
-install (FILES qt.conf DESTINATION bin)
-
-find_package(Qt6 6.8 COMPONENTS Quick QuickControls2 Charts PrintSupport SerialPort REQUIRED)
+find_package(Qt6 6.8 COMPONENTS Quick QuickControls2 Charts PrintSupport SerialPort OpenGL REQUIRED)
 
 qt_add_resources(QML_RESOURCES resources.qrc)
 
@@ -36,5 +34,6 @@ target_link_libraries(${EXECUTABLE_NAME}
             Qt6::Charts
             Qt6::PrintSupport
             Qt6::SerialPort
+            Qt6::OpenGL
             opengl32
 )

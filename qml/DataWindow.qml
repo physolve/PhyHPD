@@ -2,7 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import Qt.labs.platform 1.1
+import QtQuick.Dialogs
+import QtQuick.Controls.Material 2.12
 
 Item{
     width: parent.width
@@ -15,15 +16,17 @@ Item{
             id: connectBtn
             text: connectBtn.checked ? qsTr("Disconnect") : qsTr("Connect")
             checkable: true
+            Material.roundedScale: Material.ExtraSmallScale
             onClicked: {
                 connectBtn.checked ? backend.openSerialPort() : backend.closeSerialPort()
             }
         }
         Button{
             id: testPressValve
-            width: 120
+            // width: 120
             text : "Test to press valve"
             font.pointSize: 11
+            Material.roundedScale: Material.ExtraSmallScale
             onClicked: askToPress.open()
         }
         MessageDialog{
@@ -50,17 +53,19 @@ Item{
         //     }
         // }
         Button{
-                id: configurePressureBtn
-                text: qsTr("Configure pressure")
-                font.pointSize: 11
-                onClicked: {
-                    pressureDialog.show()
-                }
+            id: configurePressureBtn
+            text: qsTr("Configure pressure")
+            font.pointSize: 11
+            Material.roundedScale: Material.ExtraSmallScale
+            onClicked: {
+                pressureDialog.show()
+            }
         }
         Switch {
             id: startBtn
             text: qsTr("Start Read")
             font.pointSize: 14
+            Material.roundedScale: Material.NotRounded
             onToggled: backend.onReadButtonClicked(startBtn.checked)
         }
         Label { // move to log view
@@ -75,14 +80,9 @@ Item{
             }
         }      
     }
-    Item{    
-        SettingsDialog{
-            id: pressureDialog
-            c_name: "pressure"
-            //padding: 0
-            //anchors. centerIn: parent
-            //x: 100
-            //y: 500
-        }
+    SettingsDialog{
+        id: pressureDialog
+        c_name: "pressure"
+        // transientParent: parent
     }
 }

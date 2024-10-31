@@ -41,10 +41,26 @@ expInfo ExpCalc::getExpInfoStruct() const{
     return currentExpInfo;
 }
 
-void ExpCalc::applyExpFromJSON(){
+QStringList ExpCalc::getSampleNames() const{
+    return jsonLoader.getSamplesList();
+}
+
+void ExpCalc::applyExpFromJSON(const QString &sampleName){
+    currentExpParameters = jsonLoader.getSampleExpParameters(sampleName);
     emit expParametersStructChanged();
+    currentExpTiming = jsonLoader.getExpTiming(sampleName);
     emit expTimingStructChanged();
     //info changed?
+}
+
+void ExpCalc::applyExpToJSON(const QString &sampleName){
+    // firstly save under new name?
+    
+    // different logic for new and old?
+    // if new then add to sampleNamesList
+    // if old then 
+    if(jsonLoader.addNewSample(sampleName, currentExpParameters, currentExpTiming))
+        emit sampleNamesChanged();
 }
 
 void ExpCalc::startExpTime(bool s){

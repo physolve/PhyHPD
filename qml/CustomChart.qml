@@ -37,7 +37,7 @@ Item {
         width: 40
         height: 40
         anchors.left: parent.left; anchors.top: customPlotPressure.bottom
-        text: "⟳"
+        text: "r"//"⟳"
         font.pixelSize: 18
         //Material.background: Material.Red
         //Material.roundedScale: Material.FullScale
@@ -48,7 +48,7 @@ Item {
         width: 40
         height: 40
         anchors.left: resetPosBtn.right; anchors.top: customPlotPressure.bottom
-        text: "㍴"
+        text: "b"//"㍴"
         font.pixelSize: 18
         font.bold: true
         font.hintingPreference: Font.PreferNoHinting

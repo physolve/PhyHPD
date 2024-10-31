@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 //import Qt.labs.settings
+import QtQuick.Controls.Material 2.12
 import "mnemo"
 
 ApplicationWindow {
@@ -13,10 +14,10 @@ ApplicationWindow {
     Material.theme: Material.Dark
     Material.accent: Material.Indigo
     font.capitalization: Font.MixedCase
-    ObjectModel
-    {
-        id: mainContainer
-    }
+    // ObjectModel
+    // {
+    //     id: mainContainer
+    // }
     SplitView {
         id: grid
         anchors.fill: parent
@@ -33,7 +34,7 @@ ApplicationWindow {
             }
         }
         Item{
-            SplitView.minimumWidth: 500
+            SplitView.minimumWidth: 550
             SplitView.preferredWidth: 670
             TabBar {
                 id: barMain

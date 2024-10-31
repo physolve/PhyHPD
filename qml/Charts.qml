@@ -29,6 +29,7 @@ Item{
         anchors.right: parent.right
         anchors.topMargin: 20
         anchors.bottomMargin: 80
+
         Connections {
             target: pressureBack // backend?
             function onPressureChanged() { 

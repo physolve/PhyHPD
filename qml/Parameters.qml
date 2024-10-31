@@ -8,10 +8,6 @@ GroupBox {
     id: parameters
     width: parent.width
     height: parent.height
-    SampleLoader { // path is shit, try resources
-        id: expLoader
-        source: "qrc:/MHgrph/dataSrc/pseudoSampleReport.json"
-    }
     function toHHMMSS(secs) { // seems working
         let newDate = new Date(secs * 1000).toISOString().slice(11, 19);
         // debug if need, Date use 1970 thing
@@ -23,25 +19,6 @@ GroupBox {
         // minutes are worth 60 seconds. Hours are worth 60 minutes.
         let seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]); 
         return seconds; //
-    }
-    function setExpParameters(sampleName){
-        let expParameters = expLoader.jsonObject[sampleName]
-        expCalc.expTimingStruct.leakStart = expParameters.leakStart_s
-        // textLeakStart.text = toHHMMSS(expParameters.leakStart_s)
-        expCalc.expTimingStruct.leakEnd = expParameters.leakEnd_s
-        // textLeakEnd.text = toHHMMSS(expParameters.leakEnd_s)
-        expCalc.expTimingStruct.steadyStateStart = expParameters.steadyStateStart_s
-        // textSteadyStateStart.text = toHHMMSS(expParameters.steadyStateStart_s)
-        
-        let sampleParameters = expParameters.sample
-        expCalc.expParametersStruct.thickness = sampleParameters.thickness_mm 
-        // thickness.text = sampleParameters.thickness_mm
-        expCalc.expParametersStruct.diameter = sampleParameters.diameter_m
-        // diameter.text = sampleParameters.diameter_m.toExponential(3)
-        expCalc.expParametersStruct.volume = sampleParameters.sideVolume_m3
-        // sideVolume.text = sampleParameters.sideVolume_m3.toExponential(3)
-
-        expCalc.applyExpFromJSON()
     }
     function saveExpParameters(){
 
@@ -66,16 +43,20 @@ GroupBox {
             Layout.preferredWidth: 200
             ComboBox{
                 id: sampleChoose
-                width: 130
+                //width: 130
+                Layout.preferredWidth: 130
                 // height: 40
-                model: expLoader.jsonObject ? Object.keys(expLoader.jsonObject) : 0
+                model: expCalc ? expCalc.sampleNames : 0//expLoader.jsonObject ? Object.keys(expLoader.jsonObject) : 0
                 font.pointSize: 11
-                onActivated: setExpParameters(currentText)
+                onActivated: {
+                    expCalc.applyExpFromJSON(currentText)
+                    exportName.text = currentText
+                }
                 Component.onCompleted: currentIndex = -1
             }
             Button{
                 id: applySample
-                width: 130
+                //width: 130
                 text : "Apply parameters"
                 font.pointSize: 11
                 onClicked: {
@@ -108,46 +89,6 @@ GroupBox {
                     horizontalAlignment: TextInput.AlignHCenter
                 }
             }
-            // Row{
-            //     spacing: 10
-            //     Label{
-            //         width: 80
-            //         text: "Valve open"
-            //         font.pointSize: 12
-            //         anchors.verticalCenter: parent.verticalCenter
-            //     }
-            //     TextField{
-            //         id: valveOpen
-            //         width: 80
-            //         text : "00:00:00"
-            //         font.pointSize: 12
-            //         inputMask: "99:99:99"
-            //         inputMethodHints: Qt.ImhTime
-            //         anchors.verticalCenter: parent.verticalCenter
-            //         horizontalAlignment: TextInput.AlignHCenter
-            //         selectByMouse: true
-            //     }
-            // }
-            // Row{
-            //     spacing: 10
-            //     Label{
-            //         width: 80
-            //         text: "Valve close"
-            //         font.pointSize: 12
-            //         anchors.verticalCenter: parent.verticalCenter
-            //     }
-            //     TextField{
-            //         id: valveClose
-            //         width: 80
-            //         text: "00:00:00"
-            //         font.pointSize: 12
-            //         inputMask: "99:99:99"
-            //         inputMethodHints: Qt.ImhTime
-            //         anchors.verticalCenter: parent.verticalCenter
-            //         horizontalAlignment: TextInput.AlignHCenter
-            //         selectByMouse: true
-            //     }
-            // }
             Row{
                 spacing: 10
                 Label{
@@ -241,24 +182,6 @@ GroupBox {
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
-            TextField{
-                id: sampleName
-                width: 100
-                text: ""
-                font.pointSize: 12
-                inputMethodHints: Qt.ImhTime
-                horizontalAlignment: TextInput.AlignHCenter
-                selectByMouse: true
-            }
-            Button{
-                id: saveExp
-                width: 130
-                text : "Save exp parameters"
-                font.pointSize: 11
-                onClicked: {
-                    expLoader.save()
-                }
-            }
         }
         GridLayout {
             id: gridSample
@@ -328,6 +251,34 @@ GroupBox {
                     selectByMouse: true
                     anchors.verticalCenter: parent.verticalCenter
                     horizontalAlignment: TextInput.AlignHCenter
+                }
+            }
+            Row{
+                spacing: 10
+                TextField{
+                    id: exportName
+                    // property int curRunCnt:  flowToVolume ? flowToVolume.runCnt : 0
+                    text: "sample_name" //+ curRunCnt
+                    font.pointSize: 11
+                    // anchors.verticalCenter: parent.verticalCenter
+                    horizontalAlignment: TextInput.AlignHCenter
+                }
+                Button{
+                    id: exportCurrentToJson
+                    text: "Save preset"
+                    onClicked: {
+                        expCalc.expParametersStruct.thickness = textThickness.text
+                        expCalc.expParametersStruct.diameter = textDiameter.text //.toExponential(3)
+                        expCalc.expParametersStruct.volume = textVolume.text //.toExponential(3)
+
+                        expCalc.expTimingStruct.leakStart = fromHHMMSS(textLeakStart.text)
+                        expCalc.expTimingStruct.leakEnd = fromHHMMSS(textLeakEnd.text)
+                        expCalc.expTimingStruct.steadyStateStart = fromHHMMSS(textSteadyStateStart.text)
+
+                        expCalc.applyExpToJSON(exportName.text)
+
+                        sampleChoose.currentIndex = sampleChoose.indexOfValue(exportName.text)
+                    }
                 }
             }
         }
