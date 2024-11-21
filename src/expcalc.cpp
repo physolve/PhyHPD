@@ -1,8 +1,9 @@
 #include "expcalc.h"
 #include <math.h>
+#include <QFile>
 
 ExpCalc::ExpCalc(QList<QSharedPointer<ControllerData>> dataStorage, QList<QSharedPointer<ExpData>> expStorage, QObject *parent) : QObject(parent),
-currentExpResults{0, 0, 100}, currentExpParameters{1,1,1}, currentExpTiming{0,0,0}, currentExpInfo{"unknown", 0, 0, false}
+currentExpResults{0, 0, 100}, currentExpParameters{"blank",1,1,1}, currentExpTiming{0,0,0}, currentExpInfo{"unknown", 0, 0, 27, false, "", "", -1}
 {
     timeData = dataStorage[0];
     pressure = dataStorage[1];
@@ -28,6 +29,10 @@ void ExpCalc::setExpTimingStruct(const expTiming &val){
     // emit expTimingStructChanged();
 }
 
+void ExpCalc::setExpInfoStruct(const expInfo &val){
+    currentExpInfo = val;
+}
+
 expParameters ExpCalc::getExpParametersStruct() const{
     return currentExpParameters;
 }
@@ -41,26 +46,70 @@ expInfo ExpCalc::getExpInfoStruct() const{
     return currentExpInfo;
 }
 
-QStringList ExpCalc::getSampleNames() const{
-    return jsonLoader.getSamplesList();
+QStringList ExpCalc::getExpNames() const{
+    return jsonLoader.getExpList();
 }
 
-void ExpCalc::applyExpFromJSON(const QString &sampleName){
-    currentExpParameters = jsonLoader.getSampleExpParameters(sampleName);
+void ExpCalc::applyExpFromJSON(const QString &expName){
+    currentExpParameters = jsonLoader.getExpParameters(expName);
     emit expParametersStructChanged();
-    currentExpTiming = jsonLoader.getExpTiming(sampleName);
+    currentExpTiming = jsonLoader.getExpTiming(expName);
     emit expTimingStructChanged();
-    //info changed?
+    currentExpInfo = jsonLoader.getExpInfo(expName);
+    emit expInfoStructChanged();
 }
 
-void ExpCalc::applyExpToJSON(const QString &sampleName){
-    // firstly save under new name?
+bool ExpCalc::isLastDataAvailable(const QString &expName){
+    return jsonLoader.checkLastSampleData(expName);
+}
+
+void ExpCalc::calculateLastData(){
+    // cleaning data containers
+    // if(setPointsFromFile(jsonLoader.getSampleDataFile(currentExpInfo.m_expName))){
+    //     collectValues();
+    // }
+    if(currentExpInfo.m_lastExpDataFile.isEmpty())
+        return;
+    if(setPointsFromFile(currentExpInfo.m_lastExpDataFile)){
+        collectValues();
+    }
+}
+
+bool ExpCalc::setPointsFromFile(const QString &sampleDataFilePath){ // log calc function
+    QFile expData(sampleDataFilePath); // path to current data file from JSON struct
+	if (!expData.open(QIODevice::ReadOnly | QIODevice::Text))
+        return false;
+    QTextStream in(&expData);
+    in.readLine(); // skip header
     
+    while (!in.atEnd()) {
+        const auto &lineList = in.readLine().split('\t');
+        double p_p = lineList.at(2).toDouble() * pow(10,5); //pressure, bar to Pa
+        double p_s = lineList.at(3).toDouble() * pow(10,5); //vacuum, bar to Pa
+        double absTemp = 273 + currentExpInfo.m_temperature; // K 
+        unsigned int t = lineList.at(1).toInt();
+
+        m_accumulation << (accumulationPoint(p_p,p_s,absTemp,t));
+        // unsigned int n = 120;
+        // while(n > 0 && !in.atEnd()){
+        //     in.readLine();
+        //     --n;
+        // }
+    }
+    return true;
+}
+
+void ExpCalc::applyExpToJSON(const QString &expName){
+    // firstly save under new name?
+    qDebug() << "Saving to JSON for " << expName; 
     // different logic for new and old?
     // if new then add to sampleNamesList
     // if old then 
-    if(jsonLoader.addNewSample(sampleName, currentExpParameters, currentExpTiming))
-        emit sampleNamesChanged();
+    if(jsonLoader.addNewSample(currentExpInfo, currentExpParameters, currentExpTiming)){
+        // make new as current
+        emit expNamesChanged();
+    }
+
 }
 
 void ExpCalc::startExpTime(bool s){
@@ -103,10 +152,6 @@ bool ExpCalc::setSteadyStateStart(bool s){
         emit expTimingStructChanged();
     }
     return true;
-}
-
-void ExpCalc::addAccumulationPoint(const accumulationPoint& aP){
-    m_accumulation << aP;
 }
 
 bool ExpCalc::steadyStateTrigger(){ // try to use with pseudo data

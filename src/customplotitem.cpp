@@ -30,28 +30,15 @@ void CustomPlotItem::initCustomPlot(int index) {
         m_index = index;
         connect( m_CustomPlot, &QCustomPlot::destroyed, this, [=](){ qDebug() << QString(" QCustomPlot (%1) pointer is destroyed ").arg(index); });
         updateCustomPlotSize();
-        // m_CustomPlot->setLocale(QLocale(QLocale::English, QLocale::UnitedKingdom));
         // m_CustomPlot->setOpenGl(true);
         m_CustomPlot->setNoAntialiasingOnDrag(true);
-        // m_CustomPlot->layer(0)->setMode(QCPLayer::LayerMode::lmBuffered);
         QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
         timeTicker->setTimeFormat("%h:%m:%s");
         m_CustomPlot->xAxis->setTicker(timeTicker);
         // m_CustomPlot->xAxis->setRange(0.0, 1.0);
         m_CustomPlot->axisRect()->setupFullAxesBox(); //?
         m_CustomPlot->yAxis->setRange(0.0, 1.0);
-        // auto yAxisFont = m_CustomPlot->yAxis->tickLabelFont();
-        // yAxisFont.setFamily("Roboto");
-        // yAxisFont.setPointSize(12);
-        // m_CustomPlot->yAxis->setTickLabelFont(yAxisFont);
-        // m_CustomPlot->yAxis->setTickLabelPadding(10);
-        // m_CustomPlot->yAxis->setLabelPadding(10);
-        // QSharedPointer<QCPAxisTickerFixed> fixedTicker(new QCPAxisTickerFixed);
-        // m_CustomPlot->yAxis->setTicker(fixedTicker);
 
-        // fixedTicker->setTickStep(1.0); // tick step shall be 1.0
-        // fixedTicker->setScaleStrategy(QCPAxisTickerFixed::ssNone); // and no scaling of the tickstep (like multiples or powers) is allowed
-        // m_CustomPlot->yAxis->setTickLabelPadding(-40);
         //make left and bottom axes transfer their ranges to right and top axes:
         connect(m_CustomPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), m_CustomPlot->xAxis2, SLOT(setRange(QCPRange))); //?
         connect(m_CustomPlot->yAxis, SIGNAL(rangeChanged(QCPRange)), m_CustomPlot->yAxis2, SLOT(setRange(QCPRange))); //?
@@ -124,8 +111,6 @@ void CustomPlotItem::placePointerGraph(QList<QSharedPointer<DataCollection>> sen
             m_CustomPlot->graph()->setPen(pen);
             m_CustomPlot->graph()->setLineStyle(QCPGraph::LineStyle::lsLine);
             m_CustomPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, pen, QBrush(Qt::white), 7));
-            m_CustomPlot->yAxis->setNumberFormat("e");
-            m_CustomPlot->yAxis->setNumberPrecision(2);
         }
         else{
             QStringList lineColors = {"#cb8175", "#e2a97e", "#f0cf8e", "#f6edcd", "#a8c8a6", "#6d8d8a", "#655057" };
@@ -229,6 +214,7 @@ void CustomPlotItem::routeWheelEvents(QWheelEvent *event) {
             event->phase(), event->inverted());
         QCoreApplication::postEvent(m_CustomPlot, newEvent);
         m_CustomPlot->yAxis->rescale(); //?
+        m_CustomPlot->yAxis->setRangeUpper(m_CustomPlot->yAxis->range().upper*1.1);
     }
 }
 

@@ -3,7 +3,6 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 GroupBox {
-
     title: "Experimental parameters"
     id: parameters
     width: parent.width
@@ -20,14 +19,23 @@ GroupBox {
         let seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]); 
         return seconds; //
     }
-    function saveExpParameters(){
+    function saveParameters(){
+        expCalc.expInfoStruct.expTemperature = temperatureValue.text
 
+        expCalc.expParametersStruct.nameOfSample = textSampleName.text
+        expCalc.expParametersStruct.thickness = textThickness.text
+        expCalc.expParametersStruct.diameter = textDiameter.text //.toExponential(3)
+        expCalc.expParametersStruct.volume = textVolume.text //.toExponential(3)
+
+        expCalc.expTimingStruct.leakStart = fromHHMMSS(textLeakStart.text)
+        expCalc.expTimingStruct.leakEnd = fromHHMMSS(textLeakEnd.text)
+        expCalc.expTimingStruct.steadyStateStart = fromHHMMSS(textSteadyStateStart.text)
     }
     ScrollView {
         anchors.fill: parent
         anchors.margins: 10
         contentWidth: gridExp.width + 10
-        contentHeight: gridExp.height + gridSample.height + 10  // Same
+        contentHeight: gridExp.height + 10 + 50  // Same
         clip: true
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
         ScrollBar.vertical.policy: ScrollBar.AsNeeded
@@ -38,42 +46,91 @@ GroupBox {
             anchors.left: parent.left
             implicitHeight: 200
             flow: GridLayout.LeftToRight
-            columns: parameters.width/220
+            columns: parameters.width/260
             rowSpacing: 20
-            Layout.preferredWidth: 200
-            ComboBox{
-                id: sampleChoose
-                //width: 130
-                Layout.preferredWidth: 130
-                // height: 40
-                model: expCalc ? expCalc.sampleNames : 0//expLoader.jsonObject ? Object.keys(expLoader.jsonObject) : 0
-                font.pointSize: 11
-                onActivated: {
-                    expCalc.applyExpFromJSON(currentText)
-                    exportName.text = currentText
+            // Layout.preferredWidth: 350
+            Row{
+                spacing: 10
+                Label{
+                    width: 100
+                    text: "Exp list:"
+                    font.pointSize: 12
+                    anchors.verticalCenter: parent.verticalCenter
                 }
-                Component.onCompleted: currentIndex = -1
+                ComboBox{
+                    id: sampleChoose
+                    width: 150
+                    // Layout.minimumWidth: 200
+                    // height: 40
+                    model: expCalc ? expCalc.expNames : 0//expLoader.jsonObject ? Object.keys(expLoader.jsonObject) : 0
+                    font.pointSize: 11
+                    onActivated: {
+                        expCalc.applyExpFromJSON(currentText)
+                        // exportName.text = currentText
+                        calculateLastData.enabled = expCalc.isLastDataAvailable(currentText)
+                    }
+                    Component.onCompleted: {
+                        currentIndex = 0
+                        expCalc.applyExpFromJSON(currentText)
+                    }
+                }
+                
             }
-            Button{
-                id: applySample
-                //width: 130
-                text : "Apply parameters"
-                font.pointSize: 11
-                onClicked: {
-                    expCalc.expParametersStruct.thickness = textThickness.text
-                    expCalc.expParametersStruct.diameter = textDiameter.text //.toExponential(3)
-                    expCalc.expParametersStruct.volume = textVolume.text //.toExponential(3)
+            Row{
+                spacing: 10
 
-                    expCalc.expTimingStruct.leakStart = fromHHMMSS(textLeakStart.text)
-                    expCalc.expTimingStruct.leakEnd = fromHHMMSS(textLeakEnd.text)
-                    expCalc.expTimingStruct.steadyStateStart = fromHHMMSS(textSteadyStateStart.text)
+                DelayButton{
+                    Layout.preferredWidth: 150
+                    id: calculateLastData
+                    text: "Hold to view last results"
+                    enabled: false
+                    onActivated: expCalc.calculateLastData()
                 }
             }
             Row{
                 spacing: 10
                 Label{
-                    width: 80
-                    text: "Log start"
+                    width: 100
+                    text: "Exp name:"
+                    font.pointSize: 12
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                TextField{
+                    id: exportName
+                    // property int curRunCnt:  flowToVolume ? flowToVolume.runCnt : 0
+                    width: 140
+                    text: expCalc ? expCalc.expInfoStruct.chExpName : "blank" //+ curRunCnt
+                    font.pointSize: 11
+                    placeholderText: "Эксперимент..."
+                    // anchors.verticalCenter: parent.verticalCenter
+                    horizontalAlignment: TextInput.AlignHCenter
+                }
+            }
+            Row{
+                spacing: 10
+                Label{
+                    width: 100
+                    text: "Sample name:"
+                    font.pointSize: 12
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                TextField{
+                    id: textSampleName
+                    // property int curRunCnt:  flowToVolume ? flowToVolume.runCnt : 0
+                    width: 140
+                    text: expCalc ? expCalc.expParametersStruct.nameOfSample : "" //+ curRunCnt
+                    font.pointSize: 11
+                    // anchors.verticalCenter: parent.verticalCenter
+                    placeholderText: "Образец ..."
+                    horizontalAlignment: TextInput.AlignHCenter
+                }
+            }
+            
+            Row{
+                spacing: 10
+                Label{
+                    width: 120
+                    text: "Exp start:"
                     font.pointSize: 12
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -92,8 +149,8 @@ GroupBox {
             Row{
                 spacing: 10
                 Label{
-                    width: 80
-                    text: "Leak start"
+                    width: 120
+                    text: "Leak start:"
                     font.pointSize: 12
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -114,8 +171,8 @@ GroupBox {
             Row{
                 spacing: 10
                 Label{
-                    width: 80
-                    text: "Leak end"
+                    width: 120
+                    text: "Leak end:"
                     font.pointSize: 12
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -135,8 +192,8 @@ GroupBox {
             Row{
                 spacing: 10
                 Label{
-                    width: 80
-                    text: "Steady State"
+                    width: 120
+                    text: "Steady State:"
                     font.pointSize: 12
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -156,8 +213,8 @@ GroupBox {
             Row{
                 spacing: 10
                 Label{
-                    width: 80
-                    text: "Log end"
+                    width: 120
+                    text: "Exp end:"
                     font.pointSize: 12
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -176,30 +233,18 @@ GroupBox {
             Row{
                 spacing: 10
                 Label{
-                    width: 80
-                    text: "Current status"
+                    width: 120
+                    property string statusStr: expCalc ? expCalc.expInfoStruct.isExpWorking ? "Exp started" : "Exp waiting" : ""
+                    text: "Current status: " + statusStr
                     font.pointSize: 12
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
-        }
-        GridLayout {
-            id: gridSample
-            width: parameters.width - 40
-            anchors.top: gridExp.bottom
-            anchors.left: parent.left
-            anchors.topMargin: 10
-            implicitHeight: 200
-            flow: GridLayout.LeftToRight
-            columns: parameters.width/220
-            rowSpacing: 20
-            Layout.preferredWidth: 200 
-
             Row{
                 spacing: 10
                 Label{
                     width: 120
-                    text: "Thickness, mm"
+                    text: "Thickness, mm:"
                     font.pointSize: 12
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -218,8 +263,8 @@ GroupBox {
             Row{
                 spacing: 10
                 Label{
-                    width: 80
-                    text: "Diameter, m"
+                    width: 120
+                    text: "Diameter, m:"
                     font.pointSize: 12
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -238,7 +283,7 @@ GroupBox {
                 spacing: 10
                 Label{
                     width: 120
-                    text: "Side Volume, m3"
+                    text: "Side Volume, m3:"
                     font.pointSize: 12
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -255,32 +300,49 @@ GroupBox {
             }
             Row{
                 spacing: 10
+                Label{
+                    width: 120
+                    text: "Temperature, °C:"
+                    font.pointSize: 12
+                    anchors.verticalCenter: parent.verticalCenter
+                }
                 TextField{
-                    id: exportName
-                    // property int curRunCnt:  flowToVolume ? flowToVolume.runCnt : 0
-                    text: "sample_name" //+ curRunCnt
-                    font.pointSize: 11
-                    // anchors.verticalCenter: parent.verticalCenter
+                    id: temperatureValue
+                    width: 100
+                    text: expCalc ? expCalc.expInfoStruct.expTemperature : 0
+                    font.pointSize: 12
+                    validator: DoubleValidator { bottom: 1e-12; top: 10000} //; decimals: 2
+                    selectByMouse: true
+                    anchors.verticalCenter: parent.verticalCenter
                     horizontalAlignment: TextInput.AlignHCenter
                 }
-                Button{
-                    id: exportCurrentToJson
-                    text: "Save preset"
-                    onClicked: {
-                        expCalc.expParametersStruct.thickness = textThickness.text
-                        expCalc.expParametersStruct.diameter = textDiameter.text //.toExponential(3)
-                        expCalc.expParametersStruct.volume = textVolume.text //.toExponential(3)
+            } 
+        }
 
-                        expCalc.expTimingStruct.leakStart = fromHHMMSS(textLeakStart.text)
-                        expCalc.expTimingStruct.leakEnd = fromHHMMSS(textLeakEnd.text)
-                        expCalc.expTimingStruct.steadyStateStart = fromHHMMSS(textSteadyStateStart.text)
-
-                        expCalc.applyExpToJSON(exportName.text)
-
-                        sampleChoose.currentIndex = sampleChoose.indexOfValue(exportName.text)
-                    }
-                }
+        Button{
+            id: exportCurrentToJson
+            width: 130
+            anchors.top: gridExp.bottom
+            anchors.right: applySample.left
+            anchors.rightMargin: 20
+            text: "Export"
+            font.pointSize: 11
+            onClicked: {
+                expCalc.expInfoStruct.chExpName = exportName.text
+                saveParameters()
+                expCalc.applyExpToJSON(exportName.text)
+                sampleChoose.currentIndex = sampleChoose.indexOfValue(exportName.text)
             }
+        }
+        Button{
+            id: applySample
+            width: 130
+            anchors.top: gridExp.bottom
+            anchors.right: parent.right
+            anchors.rightMargin: 20
+            text : "Save"
+            font.pointSize: 11
+            onClicked: saveParameters()
         }
     }
 }

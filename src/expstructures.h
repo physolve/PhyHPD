@@ -11,10 +11,12 @@ struct accumulationPoint{
 struct expParameters{ // sample
     Q_GADGET
     // it might be linked to json for import and multi-result log
+    Q_PROPERTY (QString nameOfSample MEMBER m_nameOfSample)
     Q_PROPERTY (double volume MEMBER m_volume)
     Q_PROPERTY (double thickness MEMBER m_thickness)
     Q_PROPERTY (double diameter MEMBER m_diameter)
 public:
+    QString m_nameOfSample;
     double m_volume; // m3
     double m_thickness; // m
     double m_diameter;
@@ -34,12 +36,23 @@ public:
 struct expInfo{
     Q_GADGET
 public:
-    QString m_expName;
+    QString m_expName; 
     unsigned int m_expStart; // to expTiming
     unsigned int m_expEnd; // to expTiming
+    double m_temperature;
     bool isExpWorking;
+    QString m_lastExpDataFile;
+    QString m_currentExpDataFile;
+    int m_expCount;
+    Q_PROPERTY (QString chExpName MEMBER m_expName)
+    Q_PROPERTY (QString lastExpDataFile MEMBER m_lastExpDataFile)
+    Q_PROPERTY (QString currentExpDataFile MEMBER m_currentExpDataFile)
+    Q_PROPERTY (int expCount MEMBER m_expCount)
+    Q_PROPERTY (double expTemperature MEMBER m_temperature)
+
     Q_PROPERTY (int expStart MEMBER m_expStart)
     Q_PROPERTY (int expEnd MEMBER m_expEnd)
+
 };
 
 struct expResults{

@@ -9,6 +9,8 @@ int main(int argc, char *argv[]) {
     // QLocale::setDefault(curLocale);
     qputenv("QT_FONT_DPI", QByteArray("96")); //156
     qputenv("QML_DISABLE_DISTANCEFIELD", "1");
+    // qputenv("QT_QUICK_CONTROLS_CONF", ":/qml/qtquickcontrols2.conf");
+    QQuickWindow::setTextRenderType(QQuickWindow::CurveTextRendering);
     // qputenv("QML_XHR_ALLOW_FILE_READ", QString("1").toUtf8());
     MainWindow app(argc, argv);
     return app.exec();

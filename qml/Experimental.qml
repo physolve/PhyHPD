@@ -29,7 +29,7 @@ Item{
         anchors.bottom: parent.bottom
         //width: parent.width
         anchors.topMargin: 20
-        anchors.bottomMargin: 80
+        anchors.bottomMargin: 30
         currentIndex: barExp.currentIndex
         Item{
             Layout.fillHeight: true

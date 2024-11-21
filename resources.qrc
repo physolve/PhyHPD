@@ -1,4 +1,7 @@
 <RCC>
+    <qresource prefix="/">
+        <file>qtquickcontrols2.conf</file>
+    </qresource>
     <qresource prefix="/MHgrph">
         <file>qml/main.qml</file>
         <file>qml/DataWindow.qml</file>
@@ -16,5 +19,6 @@
         <file>qml/images/scheme.jpg</file>
         <file>qml/images/scheme_1.jpg</file>
         <file>dataSrc/pseudoSampleReport.json</file>
+
     </qresource>
 </RCC>

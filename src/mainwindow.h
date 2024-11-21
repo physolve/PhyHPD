@@ -26,7 +26,6 @@ public:
     Q_INVOKABLE void onReadButtonClicked(bool s);
     Q_INVOKABLE void openSerialPort();
     Q_INVOKABLE void closeSerialPort();
-    Q_INVOKABLE void preapreExpCalc();
 
     Q_INVOKABLE void beginExp(const QString &runName, bool state);
 signals:
@@ -42,11 +41,6 @@ private:
     void initCalc();
     void initChartModel();
     void initDataSet(); // database
-    
-    void feedExpValues();
-
-    bool setPointsFromFile();
-    void calcToPlot();
 
     WriteLogFile m_writeLog;
     // QTimer *m_logTimer;

@@ -10,24 +10,28 @@ static const double Rgas = 8.31446;
 class ExpCalc : public QObject
 {
 	Q_OBJECT
-    Q_PROPERTY(QStringList sampleNames READ getSampleNames NOTIFY sampleNamesChanged) // notify after new save
+    Q_PROPERTY(QStringList expNames READ getExpNames NOTIFY expNamesChanged) // notify after new save
     Q_PROPERTY(expParameters expParametersStruct READ getExpParametersStruct WRITE setExpParametersStruct NOTIFY expParametersStructChanged) 
     Q_PROPERTY(expTiming expTimingStruct READ getExpTimingStruct WRITE setExpTimingStruct  NOTIFY expTimingStructChanged) //
     Q_PROPERTY(expResults expResultsStruct READ getExpResultsStruct NOTIFY expResultsStructChanged) //WRITE setExpTimingStruct
-    Q_PROPERTY(expInfo expInfoStruct READ getExpInfoStruct NOTIFY expInfoStructChanged) //WRITE setExpTimingStruct 
+    Q_PROPERTY(expInfo expInfoStruct READ getExpInfoStruct WRITE setExpInfoStruct NOTIFY expInfoStructChanged) //WRITE setExpTimingStruct 
     Q_PROPERTY(QString resultStr READ getResultStr NOTIFY resultChanged)
 public:
     ExpCalc(QList<QSharedPointer<ControllerData>> dataStorage, QList<QSharedPointer<ExpData>> expStorage, QObject *parent = 0);
 	~ExpCalc();
     Q_INVOKABLE void applyExpFromJSON(const QString &name);
-    Q_INVOKABLE void applyExpToJSON(const QString &name);
+    Q_INVOKABLE void applyExpToJSON(const QString &expName);
     Q_INVOKABLE void reCalculateDiffusFit(const double &corrTimeLagVal); //test
-    
+
+    Q_INVOKABLE void calculateLastData();
+    Q_INVOKABLE bool isLastDataAvailable(const QString &expName);
+
     Q_INVOKABLE bool setLeakStart(bool s);
     Q_INVOKABLE bool setLeakEnd(bool s);
     Q_INVOKABLE bool setSteadyStateStart(bool s);
-    
-    void addAccumulationPoint(const accumulationPoint& aP);
+
+    bool setPointsFromFile(const QString &name);
+
     bool steadyStateTrigger();
     void collectValues();
 
@@ -44,13 +48,13 @@ public:
     // void setExpResultsStruct(expResults val);
 
     expInfo getExpInfoStruct() const;
-    
+    void setExpInfoStruct(const expInfo &val);
     // void reCalculateDiffusFit(const double &corrTimeLagVal);
     QString getResultStr() const;
 
-    QStringList getSampleNames() const;
+    QStringList getExpNames() const;
 signals:
-    void sampleNamesChanged();
+    void expNamesChanged();
     void expParametersStructChanged();
     void expTimingStructChanged();
     void expResultsStructChanged();
@@ -82,8 +86,7 @@ private:
     double J_0_corr;
     double J_inf_corr;
 
-    expInfo currentExpInfo;
-    
+    expInfo currentExpInfo; // expName, m_expStart, m_expEnd, m_temperature, isExpWorking, m_lastExpDataFile, m_currentExpDataFile, m_expCount
     expParameters currentExpParameters;
     expTiming currentExpTiming;
     expResults currentExpResults;

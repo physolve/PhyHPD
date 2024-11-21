@@ -95,95 +95,81 @@ GroupBox {
                     selectByMouse: true
                 }
             }
-            Row{
-                spacing: 10
+            
+            Button {
+                // id: startExp
                 Layout.columnSpan: 2
-                Button{
-                    // width: 130
-                    text: "Calculate"
-                    font.pointSize: 11
-                    Material.roundedScale: Material.SmallScale
-                }
-                Button{
-                    // width: 160
-                    text: "Test set constants"
-                    font.pointSize: 11
-                    Material.roundedScale: Material.SmallScale
-                    onClicked: backend.preapreExpCalc()
-                }
+                Layout.preferredWidth: 250
+                Layout.alignment: Qt.AlignHCenter
+                checkable: true
+                text: expCalc ? expCalc.expInfoStruct.isExpWorking ? qsTr("Exp working. Push to end") : qsTr("Exp waiting. Push to start") : "I don't know" 
+                font.pointSize: 11
+                Material.roundedScale: Material.SmallScale
+                onToggled: backend.beginExp(runName.text, checked) // unknown behavior
             }
+            // Row{
+            //     spacing: 10
+            //     Layout.columnSpan: 2
+            //     TextField{
+            //         id: runName
+            //         // property int curRunCnt:  flowToVolume ? flowToVolume.runCnt : 0
+            //         text: "Запуск #" //+ curRunCnt
+            //         font.pointSize: 11
+            //         // anchors.verticalCenter: parent.verticalCenter
+            //         horizontalAlignment: TextInput.AlignHCenter
+            //     }
+            // }
+            
             Row{
-                spacing: 10
+                spacing: 50
                 Layout.columnSpan: 2
-                TextField{
-                    id: runName
-                    // property int curRunCnt:  flowToVolume ? flowToVolume.runCnt : 0
-                    text: "Запуск #" //+ curRunCnt
-                    font.pointSize: 11
-                    // anchors.verticalCenter: parent.verticalCenter
-                    horizontalAlignment: TextInput.AlignHCenter
-                }
-                Button {
-                    // id: startExp
+                Layout.alignment: Qt.AlignHCenter
+                Button{
+                    width: 180
+                    text: "Set Leak Start"
                     checkable: true
-                    text: checked ? qsTr("Exp working") : qsTr("Exp waiting")  
                     font.pointSize: 11
                     Material.roundedScale: Material.SmallScale
-                    onToggled: backend.beginExp(runName.text, checked)
+                    onClicked: checked = expCalc.setLeakStart(checked)
+                }
+                Button{
+                    width: 180
+                    text: "Set Leak End"
+                    checkable: true
+                    font.pointSize: 11
+                    Material.roundedScale: Material.SmallScale
+                    onClicked: checked = expCalc.setLeakEnd(checked)
                 }
             }
-            Button{
-                // width: 120
-                text: "Set Leak Start"
-                checkable: true
-                font.pointSize: 11
-                Material.roundedScale: Material.SmallScale
-                onClicked: checked = expCalc.setLeakStart(checked)
-            }
-            Button{
-                // width: 120
-                text: "Set Leak End"
-                checkable: true
-                font.pointSize: 11
-                Material.roundedScale: Material.SmallScale
-                onClicked: checked = expCalc.setLeakEnd(checked)
-            }
-            Button{
-                // width: 150
-                text: "Set Steady State"
-                checkable: true
-                font.pointSize: 11
-                Material.roundedScale: Material.SmallScale
-                onClicked: checked = expCalc.setSteadyStateStart(checked)
-            }
-            Button{
-                // width: 150
-                text: "Pass accum points"
-                font.pointSize: 11
-                Material.roundedScale: Material.SmallScale
-                // onClicked: backend.preapreExpCalc()
+            Row{
+                spacing: 50
+                Layout.columnSpan: 2
+                Layout.alignment: Qt.AlignHCenter
+                Button{
+                    width: 180
+                    text: "Set Steady State"
+                    checkable: true
+                    font.pointSize: 11
+                    Material.roundedScale: Material.SmallScale
+                    onClicked: checked = expCalc.setSteadyStateStart(checked)
+                }
+                Button{
+                    width: 180
+                    text: "Pass accum points"
+                    font.pointSize: 11
+                    Material.roundedScale: Material.SmallScale
+                    // onClicked: backend.preapreExpCalc()
+                }
             }
             TextArea {
                 id: resultText
                 //Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
-                placeholderText: qsTr("Enter description")
+                Layout.columnSpan: 2
+                Layout.alignment: Qt.AlignHCenter
+                placeholderText: qsTr("Results")
                 text: expCalc ? expCalc.resultStr : ""
             }
-            Row{
-                spacing: 10
-                Button{
-                    width: 150
-                    text: "Log path"
-                    font.pointSize: 11
-                    Material.roundedScale: Material.SmallScale
-                }
-                TextField{
-                    id: logPath
-                    width: 100
-                    text : ""
-                    horizontalAlignment: TextInput.AlignHCenter
-                }
-            }
+            
             Row{
                 spacing: 10
                 Button{
@@ -238,6 +224,25 @@ GroupBox {
                     width: 100
                     text : avgSlider.value
                     horizontalAlignment: TextInput.AlignHCenter
+                }
+            }
+            Row{
+                spacing: 30
+                Layout.columnSpan: 2 
+                Layout.alignment: Qt.AlignHCenter
+                TextField{
+                    width: 250
+                    id: lastExpDataFilePath
+                    readOnly: true
+                    placeholderText: "Path to last Exp"
+                    text: expCalc ? expCalc.expInfoStruct.lastExpDataFile : ""
+                }
+                TextField{
+                    width: 250
+                    id: currentExpDataFilePath
+                    readOnly: true
+                    placeholderText: "Path to current Exp"
+                    text: expCalc ? expCalc.expInfoStruct.currentExpDataFile : ""
                 }
             }
         }

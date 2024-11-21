@@ -23,10 +23,11 @@ file(GLOB HPP_LIBS lib/*.h)
 
 add_definitions(-DQCUSTOMPLOT_USE_OPENGL )
 
+
 qt_add_executable(${EXECUTABLE_NAME}
+    ${QML_RESOURCES}
     ${CPP_SOURCES} ${HPP_SOURCES}
     ${CPP_LIBS} ${HPP_LIBS}
-    ${QML_RESOURCES}
 )
 target_link_libraries(${EXECUTABLE_NAME}
     PRIVATE Qt6::Quick

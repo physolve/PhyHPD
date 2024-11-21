@@ -27,7 +27,7 @@ QVector<double> DataCollection::getValue() const {
 }
 
 QVector<double> DataCollection::getLastToChart() const {
-    if(m_y.count() > 120)
+    if(m_y.count() > 120) // last 2 minutes only but stores all
         return m_y.last(120);
     return m_y;
 }

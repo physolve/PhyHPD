@@ -11,9 +11,9 @@ ApplicationWindow {
     height: 800
     visible: true
     title: qsTr("MHgrph")
-    Material.theme: Material.Dark
-    Material.accent: Material.Indigo
-    font.capitalization: Font.MixedCase
+    // Material.theme: Material.Dark
+    // Material.accent: Material.Indigo
+    // font.capitalization: Font.MixedCase
     // ObjectModel
     // {
     //     id: mainContainer

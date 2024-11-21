@@ -13,12 +13,17 @@ public:
     ~JsonLoader();
     bool readProfile(QString& rawData);
     bool jsonParser(const QString &rawData);
-    QStringList getSamplesList() const;
-    expParameters getSampleExpParameters(const QString &sampleName) const;
-    expTiming getExpTiming(const QString &sampleName) const;
-    bool checkNewName(const QString &sampleName);
-    bool addNewSample(const QString &sampleName, const expParameters &params, const expTiming &timing);
+    QStringList getExpList() const;
+    expParameters getExpParameters(const QString &expName) const;
+    expTiming getExpTiming(const QString &expName) const;
+    expInfo getExpInfo(const QString &expName) const;
+
+    QString getSampleDataFile(const QString &expName) const;
+    bool checkLastSampleData(const QString &expName) const;
+
+    bool checkNewName(const QString &expName);
+    bool addNewSample(const expInfo &info, const expParameters &params, const expTiming &timing);
 private:
-    QStringList samplesList;
+    QStringList expList;
     QJsonObject currentJSONobj;
 };

@@ -10395,6 +10395,9 @@ QCPAxisPainterPrivate::TickLabelData QCPAxisPainterPrivate::getTickLabelData(con
     if (!result.suffixPart.isEmpty())
       result.suffixBounds = QFontMetrics(result.baseFont).boundingRect(0, 0, 0, 0, Qt::TextDontClip, result.suffixPart);
     result.totalBounds = result.baseBounds.adjusted(0, 0, result.expBounds.width()+result.suffixBounds.width()+2, 0); // +2 consists of the 1 pixel spacing between base and exponent (see drawTickLabel) and an extra pixel to include AA
+    
+    result.basePart += QString("E%1").arg(result.expPart);
+    result.expPart = "";
   } else // useBeautifulPowers == false
   {
     result.basePart = text;
@@ -10410,7 +10413,7 @@ QCPAxisPainterPrivate::TickLabelData QCPAxisPainterPrivate::getTickLabelData(con
     transform.rotate(tickLabelRotation);
     result.rotatedTotalBounds = transform.mapRect(result.rotatedTotalBounds);
   }
-  
+   
   return result;
 }
 
