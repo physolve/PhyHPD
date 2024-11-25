@@ -104,9 +104,9 @@ bool JsonLoader::addNewSample(const expInfo &info, const expParameters &params, 
 
     expObj["sample"] = sampleObj;
 
-    expObj["leakStart_s"] = (int)timing.m_leakStart;
-    expObj["leakEnd_s"] = (int)timing.m_leakEnd;
-    expObj["steadyStateStart_s"] = (int)timing.m_steadyStateStart;
+    expObj["leakStart_s"] = (int)timing.m_leakStart - (int)round(info.m_expStart);
+    expObj["leakEnd_s"] = (int)timing.m_leakEnd - (int)round(info.m_expStart);
+    expObj["steadyStateStart_s"] = (int)timing.m_steadyStateStart - (int)round(info.m_expStart);
 
     expObj["expCount_n"] = (int)info.m_expCount+1;
     expObj["lastExpDataFile_str"] = info.m_currentExpDataFile; // grab from base sample

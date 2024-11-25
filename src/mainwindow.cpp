@@ -9,7 +9,7 @@ MainWindow::MainWindow(int &argc, char **argv)
 {
     QQuickStyle::setStyle("Material");
     // QQuickStyle::setStyle("Fusion");
-    QString applicationName = "MHgrph";
+    QString applicationName = "PhyHPD";
     
     m_engine.addImportPath(":/");
 
@@ -31,6 +31,8 @@ MainWindow::MainWindow(int &argc, char **argv)
 
     initChartModel();
     //initDataSet(); will be database
+    initExpDataCtrl();
+
     m_engine.load(url);
 
     //connect(m_logTimer, &QTimer::timeout, this, &MainWindow::processEvents);
@@ -46,6 +48,10 @@ MainWindow::~MainWindow()
     // other deletes like
     delete m_pressure;
     delete expCalc;
+
+    delete expDataCtrl;
+
+    delete chartModel;
 }
 
 void MainWindow::initController(){
@@ -55,7 +61,7 @@ void MainWindow::initController(){
     m_engine.rootContext()->setContextProperty("pressureBack", nullptr);
     if(m_settings->isPressureConnected()){ // ?
         m_pressure = new PressureController(m_settings->settings("pressure"), {timeData, pressure, vacuum});
-        connect(m_pressure, &Controller::logChanged, this, &MainWindow::logChanged);
+        connect(m_pressure, &Controller::logChanged, this, &MainWindow::setLogText);
         connect(m_pressure, &PressureController::pressureChanged, this, &MainWindow::writeToLog);
         m_engine.rootContext()->setContextProperty("pressureBack", m_pressure);
     }
@@ -81,6 +87,10 @@ void MainWindow::initDataSet(){ // I don't like this
     // m_engine.rootContext()->setContextProperty("table_model", dataSetTest);
     //m_expDataSet["dataSetTest"] = dataSetTest;
     // currentDataSet = "dataSetTest";
+}
+
+void MainWindow::initExpDataCtrl(){
+    expDataCtrl = new ExpDataCtrl({timeData, pressure, vacuum});
 }
 
 void MainWindow::onReadButtonClicked(bool s){
@@ -131,9 +141,18 @@ void MainWindow::closeSerialPort(){
 //     m_writeLog.writeLine(line);
 // }
 
-void MainWindow::beginExp(const QString &runName, bool state){
-    expNames << runName;
-    expCalc->startExpTime(state);
+void MainWindow::beginExp(bool state){
+    expCalc->setExpTime(state);
+    const auto & info = expCalc->getExpInfoStruct();
+    if(state){
+        expDataCtrl->setTimerInterval(1); // expInfo value
+        expDataCtrl->fileCreation(info.m_expName);
+        expDataCtrl->startExpCtrl(info.m_expStart);
+    }
+    else{
+        expDataCtrl->endExpCtrl();
+        expCalc->setExpDataPath(expDataCtrl->getExpFilePath());
+    }
 }
 
 void MainWindow::writeToLog(){

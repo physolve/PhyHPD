@@ -28,7 +28,7 @@ public:
     unsigned int m_leakStart; // second elapsed when valve open
     unsigned int m_leakEnd; // second elapsed after valve open
     unsigned int m_steadyStateStart;
-    Q_PROPERTY (int leakStart MEMBER m_leakStart)
+    Q_PROPERTY (unsigned int leakStart MEMBER m_leakStart)
     Q_PROPERTY (unsigned int leakEnd MEMBER m_leakEnd)
     Q_PROPERTY (unsigned int steadyStateStart MEMBER m_steadyStateStart)
 };
@@ -37,8 +37,8 @@ struct expInfo{
     Q_GADGET
 public:
     QString m_expName; 
-    unsigned int m_expStart; // to expTiming
-    unsigned int m_expEnd; // to expTiming
+    double m_expStart; // to expTiming
+    double m_expEnd; // to expTiming
     double m_temperature;
     bool isExpWorking;
     QString m_lastExpDataFile;

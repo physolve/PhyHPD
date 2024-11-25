@@ -20,6 +20,7 @@ GroupBox {
         return seconds; //
     }
     function saveParameters(){
+        expCalc.expInfoStruct.chExpName = exportName.text
         expCalc.expInfoStruct.expTemperature = temperatureValue.text
 
         expCalc.expParametersStruct.nameOfSample = textSampleName.text
@@ -328,7 +329,6 @@ GroupBox {
             text: "Export"
             font.pointSize: 11
             onClicked: {
-                expCalc.expInfoStruct.chExpName = exportName.text
                 saveParameters()
                 expCalc.applyExpToJSON(exportName.text)
                 sampleChoose.currentIndex = sampleChoose.indexOfValue(exportName.text)

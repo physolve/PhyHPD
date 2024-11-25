@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-set(EXECUTABLE_NAME "MHgrph")
+set(EXECUTABLE_NAME "PhyHPD")
 
 project(${EXECUTABLE_NAME} VERSION 0.1 LANGUAGES CXX)
 

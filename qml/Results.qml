@@ -105,20 +105,8 @@ GroupBox {
                 text: expCalc ? expCalc.expInfoStruct.isExpWorking ? qsTr("Exp working. Push to end") : qsTr("Exp waiting. Push to start") : "I don't know" 
                 font.pointSize: 11
                 Material.roundedScale: Material.SmallScale
-                onToggled: backend.beginExp(runName.text, checked) // unknown behavior
+                onToggled: backend.beginExp(checked) // unknown behavior
             }
-            // Row{
-            //     spacing: 10
-            //     Layout.columnSpan: 2
-            //     TextField{
-            //         id: runName
-            //         // property int curRunCnt:  flowToVolume ? flowToVolume.runCnt : 0
-            //         text: "Запуск #" //+ curRunCnt
-            //         font.pointSize: 11
-            //         // anchors.verticalCenter: parent.verticalCenter
-            //         horizontalAlignment: TextInput.AlignHCenter
-            //     }
-            // }
             
             Row{
                 spacing: 50

@@ -11,6 +11,7 @@
 // #include "exptable.h"
 #include "chartmodel.h"
 #include "mnemostate.h"
+#include "expdatactrl.h"
 
 class MainWindow : public QApplication
 {
@@ -27,7 +28,7 @@ public:
     Q_INVOKABLE void openSerialPort();
     Q_INVOKABLE void closeSerialPort();
 
-    Q_INVOKABLE void beginExp(const QString &runName, bool state);
+    Q_INVOKABLE void beginExp(bool state);
 signals:
     void logChanged(QString);
 
@@ -41,11 +42,10 @@ private:
     void initCalc();
     void initChartModel();
     void initDataSet(); // database
+    void initExpDataCtrl();
 
     WriteLogFile m_writeLog;
-    // QTimer *m_logTimer;
     
-    // QElapsedTimer m_programmTime;
     QString logText;
     // DataModel m_dataModel;
     
@@ -65,7 +65,7 @@ private:
     
     QStringList expNames;
     ExpCalc* expCalc;
-
+    ExpDataCtrl* expDataCtrl; // create at the start of experiment?
     ChartModel* chartModel;
     
     MnemoState m_mnemoState;

@@ -2,7 +2,7 @@
     <qresource prefix="/">
         <file>qtquickcontrols2.conf</file>
     </qresource>
-    <qresource prefix="/MHgrph">
+    <qresource prefix="/PhyHPD">
         <file>qml/main.qml</file>
         <file>qml/DataWindow.qml</file>
         <file>qml/SettingsDialog.qml</file>

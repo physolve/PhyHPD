@@ -109,12 +109,10 @@ void ExpCalc::applyExpToJSON(const QString &expName){
         // make new as current
         emit expNamesChanged();
     }
-
 }
 
-void ExpCalc::startExpTime(bool s){
+void ExpCalc::setExpTime(bool s){
     if(s){
-        m_expTime.start();
         currentExpInfo.m_expStart = timeData->getCurValue();
     }
     else{
@@ -124,11 +122,18 @@ void ExpCalc::startExpTime(bool s){
     emit expInfoStructChanged();
 }
 
+void ExpCalc::setExpDataPath(const QString &path){
+    if(!currentExpInfo.m_currentExpDataFile.isEmpty())
+        qDebug() << "Rewrite exitsting expDataPath";
+    currentExpInfo.m_currentExpDataFile = path;
+    emit expInfoStructChanged();
+}
+
 bool ExpCalc::setLeakStart(bool s){
     if(!currentExpInfo.isExpWorking)
         return false;
     if(s){
-        currentExpTiming.m_leakStart = timeData->getCurValue();//round(m_expTime.elapsed()/1000);
+        currentExpTiming.m_leakStart = round(timeData->getCurValue());
         emit expTimingStructChanged();
     }
     return true;
@@ -138,7 +143,7 @@ bool ExpCalc::setLeakEnd(bool s){
     if(!currentExpInfo.isExpWorking)
         return false;
     if(s){
-        currentExpTiming.m_leakEnd = timeData->getCurValue();//round(m_expTime.elapsed()/1000);
+        currentExpTiming.m_leakEnd = round(timeData->getCurValue());
         emit expTimingStructChanged();
     }
     return true;
@@ -148,7 +153,7 @@ bool ExpCalc::setSteadyStateStart(bool s){
     if(!currentExpInfo.isExpWorking)
         return false;
     if(s){
-        currentExpTiming.m_steadyStateStart = timeData->getCurValue();//round(m_expTime.elapsed()/1000);
+        currentExpTiming.m_steadyStateStart = round(timeData->getCurValue());
         emit expTimingStructChanged();
     }
     return true;

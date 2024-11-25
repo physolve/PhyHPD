@@ -1,6 +1,7 @@
 #include "writelogfile.h"
+#include <QDate>
 
-WriteLogFile::WriteLogFile(QObject* parent) : QObject(parent),file(QString("log-%1.txt").arg(QDate::currentDate().toString())){
+WriteLogFile::WriteLogFile(QObject* parent) : QObject(parent), file(QString("log-%1.txt").arg(QDate::currentDate().toString())){
     if (!file.open(QIODevice::ReadWrite))
         return;
     fileName = file.fileName();

@@ -1,24 +1,32 @@
 {
-    "blank":{
-        "sampleName_s": "blank",
-        "leakStart_s": 0, 
+    "blank_0": {
+        "currentExpDataFile_str": "data/pseudoData.txt",
+        "expCount_n": 0,
+        "lastExpDataFile_str": "",
         "leakEnd_s": 0,
-        "steadyStateStart_s": 0,
-        "sample":{
-            "sideVolume_m3": 1,
-            "thickness_mm": 1, 
-            "diameter_m": 1
-        }
-    },
-    "pseudoExp": {
-        "sampleName_s": "pseudoExp",
-        "leakStart_s": 280, 
-        "leakEnd_s": 330,
-        "steadyStateStart_s": 600,
+        "leakStart_s": 0,
         "sample": {
-            "sideVolume_m3": 1.43e-04,
-            "thickness_mm": 1.00, 
-            "diameter_m": 16.468e-3
-        }
+            "diameter_m": 1,
+            "sampleName_s": "",
+            "sideVolume_m3": 1,
+            "thickness_mm": 1
+        },
+        "steadyStateStart_s": 0,
+        "temperature_C": 27
+    },
+    "pseudoExp_0": {
+        "currentExpDataFile_str": "",
+        "expCount_n": 0,
+        "lastExpDataFile_str": "data/pseudoData.txt",
+        "leakEnd_s": 330,
+        "leakStart_s": 280,
+        "sample": {
+            "diameter_m": 0.016468,
+            "sampleName_s": "pseudoExp",
+            "sideVolume_m3": 0.000143,
+            "thickness_mm": 1
+        },
+        "steadyStateStart_s": 600,
+        "temperature_C": 653
     }
 }

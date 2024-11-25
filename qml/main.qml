@@ -10,7 +10,7 @@ ApplicationWindow {
     width: 1730
     height: 800
     visible: true
-    title: qsTr("MHgrph")
+    title: qsTr("PhyHPD")
     // Material.theme: Material.Dark
     // Material.accent: Material.Indigo
     // font.capitalization: Font.MixedCase

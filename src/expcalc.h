@@ -1,7 +1,7 @@
 #pragma once
 #include <QDebug>
 #include <QVariant>
-#include <QElapsedTimer>
+
 #include "expstructures.h"
 #include "jsonloader.h"
 #include "datacollection.h"
@@ -35,7 +35,8 @@ public:
     bool steadyStateTrigger();
     void collectValues();
 
-    void startExpTime(bool s);
+    void setExpTime(bool s);
+    void setExpDataPath(const QString &path);
 
     // Q_INVOKABLE void setConstants(const QVariantMap &expParametersMap); // sample parameters ?
     expParameters getExpParametersStruct() const;
@@ -72,8 +73,6 @@ private:
     QSharedPointer<ExpData> modeldiffusExp;
     QSharedPointer<ExpData> permeationExp;
 
-    QElapsedTimer m_expTime;
-
     double timeLagCalc();
     void calculateFlux(); // change of pressure per time, current absolute temperature
     void diffusionFit();
@@ -93,8 +92,6 @@ private:
     QString resultStr;
 
     JsonLoader jsonLoader;
-
-    QList<QSharedPointer<ExpData>> expStorage;
 
     QList<accumulationPoint> m_accumulation;
 };

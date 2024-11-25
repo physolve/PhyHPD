@@ -51,7 +51,7 @@ Rectangle {
         y: 0
         width: 1080
         height: 760
-        source: "qrc:/MHgrph/qml/images/scheme_1.jpg"
+        source: "qrc:/PhyHPD/qml/images/scheme_1.jpg"
         fillMode: Image.PreserveAspectFit
     }
     RoundButton {
