@@ -124,7 +124,7 @@ void ExpCalc::setExpTime(bool s){
 
 void ExpCalc::setExpDataPath(const QString &path){
     if(!currentExpInfo.m_currentExpDataFile.isEmpty())
-        qDebug() << "Rewrite exitsting expDataPath";
+        qDebug() << "Rewrite existing expDataPath";
     currentExpInfo.m_currentExpDataFile = path;
     emit expInfoStructChanged();
 }

@@ -141,7 +141,7 @@ GroupBox {
                     Material.roundedScale: Material.SmallScale
                     onClicked: checked = expCalc.setSteadyStateStart(checked)
                 }
-                Button{
+                Button{ // work with passing points, like try calculate from current data (maybe for other than demo)
                     width: 180
                     text: "Pass accum points"
                     font.pointSize: 11
